@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../lib/WorkspaceContext';
 import { Colors } from '../constants/colors';
@@ -52,6 +53,9 @@ export function SettingsScreen({ navigation }: Props) {
   const [newWsName, setNewWsName] = useState('');
   const [renamingWsId, setRenamingWsId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [defaultCurrency, setDefaultCurrency] = useState('CHF');
+
+  const CURRENCIES = ['CHF', 'EUR', 'USD'] as const;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -62,6 +66,17 @@ export function SettingsScreen({ navigation }: Props) {
       setInviteWorkspaceId(activeWorkspace?.id ?? workspaces[0].id);
     }
   }, [workspaces, activeWorkspace]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@default_currency').then(v => {
+      if (v) setDefaultCurrency(v);
+    });
+  }, []);
+
+  async function handleCurrencyChange(currency: string) {
+    setDefaultCurrency(currency);
+    await AsyncStorage.setItem('@default_currency', currency);
+  }
 
   useEffect(() => {
     if (!activeWorkspace || activeWorkspace.type === 'personal') {
@@ -389,6 +404,26 @@ export function SettingsScreen({ navigation }: Props) {
             )}
           </Section>
 
+          {/* Devise par défaut */}
+          <Section title="Devise par défaut">
+            <Text style={styles.currencyHint}>
+              Utilisée quand tu ne mentionnes pas la devise dans ta phrase vocale.
+            </Text>
+            <View style={styles.currencyRow}>
+              {CURRENCIES.map(c => (
+                <TouchableOpacity
+                  key={c}
+                  style={[styles.currencyChip, defaultCurrency === c && styles.currencyChipActive]}
+                  onPress={() => handleCurrencyChange(c)}
+                >
+                  <Text style={[styles.currencyChipText, defaultCurrency === c && styles.currencyChipTextActive]}>
+                    {c}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Section>
+
           {/* Logout */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <Text style={styles.logoutText}>Se déconnecter</Text>
@@ -544,6 +579,15 @@ const styles = StyleSheet.create({
   sendButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
   inviteMsgText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
 
+  currencyHint: { fontSize: 13, color: Colors.textMuted, lineHeight: 18, marginBottom: 12 },
+  currencyRow: { flexDirection: 'row', gap: 10 },
+  currencyChip: {
+    flex: 1, paddingVertical: 12, borderRadius: 12,
+    backgroundColor: Colors.surfaceAlt, alignItems: 'center',
+  },
+  currencyChipActive: { backgroundColor: Colors.primary },
+  currencyChipText: { fontSize: 15, fontWeight: '700', color: Colors.textSecondary },
+  currencyChipTextActive: { color: '#FFFFFF' },
   logoutButton: {
     backgroundColor: Colors.surface, borderRadius: 16,
     paddingVertical: 16, alignItems: 'center',

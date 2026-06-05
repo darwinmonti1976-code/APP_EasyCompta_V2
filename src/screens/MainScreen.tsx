@@ -22,6 +22,7 @@ import { Colors } from '../constants/colors';
 import { MicButton } from '../components/MicButton';
 import { TransactionCard } from '../components/TransactionCard';
 import { Transaction, RecurrenceInterval, TransactionType } from '../lib/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -59,6 +60,7 @@ export function MainScreen({ navigation }: Props) {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [dueRecurring, setDueRecurring] = useState<Transaction[]>([]);
   const [monthSummary, setMonthSummary] = useState<{ income: number; expense: number } | null>(null);
+  const [defaultCurrency, setDefaultCurrency] = useState('CHF');
   const [savedTx, setSavedTx] = useState<Transaction | null>(null);
   const [showQuickEdit, setShowQuickEdit] = useState(false);
   const [quickForm, setQuickForm] = useState<{
@@ -78,6 +80,9 @@ export function MainScreen({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       refreshWorkspaces();
+      AsyncStorage.getItem('@default_currency').then(v => {
+        if (v) setDefaultCurrency(v);
+      });
     }, [refreshWorkspaces])
   );
 
@@ -331,7 +336,7 @@ export function MainScreen({ navigation }: Props) {
         return;
       }
 
-      const parsed = await parseTransaction(transcription);
+      const parsed = await parseTransaction(transcription, defaultCurrency);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !activeWorkspace) {
         showFeedback('Espace de travail non chargé — réessaie', 'error');
@@ -346,7 +351,7 @@ export function MainScreen({ navigation }: Props) {
         .insert({
           date: today,
           amount: parsed.amount,
-          currency: parsed.currency || 'CHF',
+          currency: parsed.currency || defaultCurrency,
           type: parsed.type,
           category: parsed.category,
           payment_method: parsed.payment_method,
