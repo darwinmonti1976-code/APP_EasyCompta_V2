@@ -143,6 +143,7 @@ export function HistoryScreen({ navigation }: Props) {
   const [loadError, setLoadError] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [photoViewerUrl, setPhotoViewerUrl] = useState<string | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsTab, setAnalyticsTab] = useState<'cat' | 'trend'>('cat');
   const [budgetTarget, setBudgetTarget] = useState<{ cat: string; current: string } | null>(null);
@@ -682,11 +683,16 @@ export function HistoryScreen({ navigation }: Props) {
                   <Text style={styles.modalDescription}>{selectedTransaction.description_clean}</Text>
 
                   {selectedTransaction.attachment_url ? (
-                    <Image
-                      source={{ uri: selectedTransaction.attachment_url }}
-                      style={styles.attachmentImage}
-                      resizeMode="cover"
-                    />
+                    <TouchableOpacity
+                      activeOpacity={0.9}
+                      onPress={() => setPhotoViewerUrl(selectedTransaction.attachment_url!)}
+                    >
+                      <Image
+                        source={{ uri: selectedTransaction.attachment_url }}
+                        style={styles.attachmentImage}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
                   ) : null}
 
                   <View style={styles.modalDetails}>
@@ -791,6 +797,31 @@ export function HistoryScreen({ navigation }: Props) {
           </View>
         )}
       </Modal>
+
+      {/* Fullscreen photo viewer */}
+      <Modal
+        visible={!!photoViewerUrl}
+        animationType="fade"
+        transparent={false}
+        statusBarTranslucent
+        onRequestClose={() => setPhotoViewerUrl(null)}
+      >
+        <View style={styles.photoViewer}>
+          <TouchableOpacity
+            style={styles.photoViewerClose}
+            onPress={() => setPhotoViewerUrl(null)}
+          >
+            <Text style={styles.photoViewerCloseText}>✕</Text>
+          </TouchableOpacity>
+          {photoViewerUrl && (
+            <Image
+              source={{ uri: photoViewerUrl }}
+              style={styles.photoViewerImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -865,6 +896,32 @@ const styles = StyleSheet.create({
   loadingText: { color: Colors.textSecondary, fontSize: 15 },
   emptyIcon: { fontSize: 48 },
   emptyText: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', maxWidth: 200 },
+  photoViewer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+  },
+  photoViewerClose: {
+    position: 'absolute',
+    top: 56,
+    right: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoViewerCloseText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  photoViewerImage: {
+    width: '100%',
+    height: '100%',
+  },
   retryButton: {
     marginTop: 4, backgroundColor: Colors.primaryLight,
     paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
