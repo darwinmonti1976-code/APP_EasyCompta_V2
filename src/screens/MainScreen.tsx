@@ -19,7 +19,8 @@ import { supabase } from '../lib/supabase';
 import { transcribeAudio, parseTransaction, ocrReceipt } from '../lib/openai';
 import { useAudioRecorder } from '../lib/useAudioRecorder';
 import { useWorkspace } from '../lib/WorkspaceContext';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 import { MicButton } from '../components/MicButton';
 import { TransactionCard } from '../components/TransactionCard';
 import { Transaction, RecurrenceInterval, TransactionType } from '../lib/types';
@@ -54,6 +55,8 @@ function nextDueDate(fromDate: string, interval: RecurrenceInterval): string {
 }
 
 export function MainScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [feedback, setFeedback] = useState<FeedbackState>(null);
@@ -557,14 +560,14 @@ export function MainScreen({ navigation }: Props) {
         <View style={styles.summaryCard}>
           <View style={styles.summaryCardItem}>
             <Text style={styles.summaryCardLabel}>Revenus</Text>
-            <Text style={[styles.summaryCardValue, { color: Colors.success }]}>
+            <Text style={[styles.summaryCardValue, { color: colors.success }]}>
               +{monthSummary.income.toFixed(0)}
             </Text>
           </View>
           <View style={styles.summaryCardDivider} />
           <View style={styles.summaryCardItem}>
             <Text style={styles.summaryCardLabel}>Dépenses</Text>
-            <Text style={[styles.summaryCardValue, { color: Colors.expense }]}>
+            <Text style={[styles.summaryCardValue, { color: colors.expense }]}>
               -{monthSummary.expense.toFixed(0)}
             </Text>
           </View>
@@ -572,7 +575,7 @@ export function MainScreen({ navigation }: Props) {
           <View style={styles.summaryCardItem}>
             <Text style={styles.summaryCardLabel}>Solde</Text>
             <Text style={[styles.summaryCardValue, {
-              color: monthSummary.income - monthSummary.expense >= 0 ? Colors.success : Colors.expense,
+              color: monthSummary.income - monthSummary.expense >= 0 ? colors.success : colors.expense,
             }]}>
               {monthSummary.income - monthSummary.expense >= 0 ? '+' : ''}
               {(monthSummary.income - monthSummary.expense).toFixed(0)}
@@ -620,7 +623,7 @@ export function MainScreen({ navigation }: Props) {
                 style={styles.fieldInput}
                 value={quickForm.description}
                 onChangeText={v => setQuickForm(f => ({ ...f, description: v }))}
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
 
               <Text style={styles.fieldLabel}>Montant</Text>
@@ -630,7 +633,7 @@ export function MainScreen({ navigation }: Props) {
                 onChangeText={v => setQuickForm(f => ({ ...f, amount: v }))}
                 keyboardType="decimal-pad"
                 placeholder="0.00"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
 
               <Text style={styles.fieldLabel}>Catégorie</Text>
@@ -638,7 +641,7 @@ export function MainScreen({ navigation }: Props) {
                 style={styles.fieldInput}
                 value={quickForm.category}
                 onChangeText={v => setQuickForm(f => ({ ...f, category: v }))}
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
 
               <Text style={styles.fieldLabel}>Type</Text>
@@ -761,123 +764,125 @@ export function MainScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8,
-  },
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    header: {
+      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8,
+    },
 
-  summaryCard: {
-    flexDirection: 'row', marginHorizontal: 24, marginBottom: 8,
-    backgroundColor: Colors.surface, borderRadius: 16, padding: 14,
-    shadowColor: Colors.cardShadow, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1, shadowRadius: 8, elevation: 2,
-  },
-  summaryCardItem: { flex: 1, alignItems: 'center', gap: 3 },
-  summaryCardDivider: { width: 1, backgroundColor: Colors.border, marginVertical: 2 },
-  summaryCardLabel: { fontSize: 10, color: Colors.textMuted, fontWeight: '600', textTransform: 'uppercase' },
-  summaryCardValue: { fontSize: 16, fontWeight: '800' },
-  greeting: { fontSize: 22, fontWeight: '800', color: Colors.text },
-  wsIndicator: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  iconButton: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surface, alignItems: 'center', justifyContent: 'center',
-    shadowColor: Colors.cardShadow, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1, shadowRadius: 4, elevation: 2,
-  },
-  iconButtonText: { fontSize: 18 },
-  feedbackBanner: {
-    marginHorizontal: 24, marginVertical: 8,
-    borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-  },
-  feedbackSuccess: { backgroundColor: Colors.successLight },
-  feedbackError: { backgroundColor: Colors.expenseLight },
-  feedbackInfo: { backgroundColor: Colors.primaryLight },
-  feedbackText: { fontSize: 14, fontWeight: '600', color: Colors.text, flex: 1 },
-  quickEditBtn: {
-    backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 5,
-  },
-  quickEditBtnText: { fontSize: 12, fontWeight: '700', color: Colors.text },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
-  modalCard: {
-    backgroundColor: Colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    padding: 28, paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 40, height: 4, backgroundColor: Colors.border, borderRadius: 2,
-    alignSelf: 'center', marginBottom: 20,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text, textAlign: 'center', marginBottom: 20 },
-  fieldLabel: { fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase' },
-  fieldInput: {
-    backgroundColor: Colors.surfaceAlt, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 15, color: Colors.text, marginBottom: 16,
-  },
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
-  typeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: Colors.surfaceAlt },
-  typeChipActive: { backgroundColor: Colors.primary },
-  typeChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  typeChipTextActive: { color: '#FFFFFF' },
-  modalActions: { flexDirection: 'row', gap: 12 },
-  cancelBtn: { flex: 1, backgroundColor: Colors.surfaceAlt, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
-  cancelBtnText: { fontSize: 15, fontWeight: '600', color: Colors.text },
-  saveBtn: { flex: 2, backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
-  saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
-  micSection: { alignItems: 'center', paddingVertical: 32 },
-  micHint: { marginTop: 16, fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
-  scanBtn: {
-    marginTop: 14,
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  scanBtnText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  listSection: { flex: 1 },
-  listTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginHorizontal: 24, marginBottom: 8 },
-  listContent: { paddingBottom: 120 },
-  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', maxWidth: 220 },
-  photoBar: {
-    position: 'absolute', bottom: 24, left: 24, right: 24,
-    backgroundColor: Colors.surface, borderRadius: 20,
-    flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12,
-    shadowColor: Colors.cardShadow, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1, shadowRadius: 16, elevation: 6,
-  },
-  photoSourceBtn: { flex: 1, alignItems: 'center', gap: 4 },
-  photoSourceIcon: { fontSize: 22 },
-  photoSourceText: { fontSize: 12, fontWeight: '700', color: Colors.text },
-  photoSkipBtn: { paddingHorizontal: 12, paddingVertical: 8 },
-  photoSkipText: { fontSize: 13, color: Colors.textMuted, fontWeight: '500' },
+    summaryCard: {
+      flexDirection: 'row', marginHorizontal: 24, marginBottom: 8,
+      backgroundColor: c.surface, borderRadius: 16, padding: 14,
+      shadowColor: c.cardShadow, shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1, shadowRadius: 8, elevation: 2,
+    },
+    summaryCardItem: { flex: 1, alignItems: 'center', gap: 3 },
+    summaryCardDivider: { width: 1, backgroundColor: c.border, marginVertical: 2 },
+    summaryCardLabel: { fontSize: 10, color: c.textMuted, fontWeight: '600', textTransform: 'uppercase' },
+    summaryCardValue: { fontSize: 16, fontWeight: '800' },
+    greeting: { fontSize: 22, fontWeight: '800', color: c.text },
+    wsIndicator: { fontSize: 13, color: c.textSecondary, marginTop: 2 },
+    headerActions: { flexDirection: 'row', gap: 8 },
+    iconButton: {
+      width: 40, height: 40, borderRadius: 12,
+      backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center',
+      shadowColor: c.cardShadow, shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1, shadowRadius: 4, elevation: 2,
+    },
+    iconButtonText: { fontSize: 18 },
+    feedbackBanner: {
+      marginHorizontal: 24, marginVertical: 8,
+      borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+      flexDirection: 'row', alignItems: 'center', gap: 10,
+    },
+    feedbackSuccess: { backgroundColor: c.successLight },
+    feedbackError: { backgroundColor: c.expenseLight },
+    feedbackInfo: { backgroundColor: c.primaryLight },
+    feedbackText: { fontSize: 14, fontWeight: '600', color: c.text, flex: 1 },
+    quickEditBtn: {
+      backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 8,
+      paddingHorizontal: 10, paddingVertical: 5,
+    },
+    quickEditBtnText: { fontSize: 12, fontWeight: '700', color: c.text },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
+    modalCard: {
+      backgroundColor: c.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+      padding: 28, paddingBottom: 40,
+    },
+    modalHandle: {
+      width: 40, height: 4, backgroundColor: c.border, borderRadius: 2,
+      alignSelf: 'center', marginBottom: 20,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: c.text, textAlign: 'center', marginBottom: 20 },
+    fieldLabel: { fontSize: 12, fontWeight: '600', color: c.textMuted, marginBottom: 6, textTransform: 'uppercase' },
+    fieldInput: {
+      backgroundColor: c.surfaceAlt, borderRadius: 12,
+      paddingHorizontal: 14, paddingVertical: 12,
+      fontSize: 15, color: c.text, marginBottom: 16,
+    },
+    typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+    typeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: c.surfaceAlt },
+    typeChipActive: { backgroundColor: c.primary },
+    typeChipText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    typeChipTextActive: { color: '#FFFFFF' },
+    modalActions: { flexDirection: 'row', gap: 12 },
+    cancelBtn: { flex: 1, backgroundColor: c.surfaceAlt, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+    cancelBtnText: { fontSize: 15, fontWeight: '600', color: c.text },
+    saveBtn: { flex: 2, backgroundColor: c.primary, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+    saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+    micSection: { alignItems: 'center', paddingVertical: 32 },
+    micHint: { marginTop: 16, fontSize: 14, color: c.textSecondary, fontWeight: '500' },
+    scanBtn: {
+      marginTop: 14,
+      backgroundColor: c.surfaceAlt,
+      borderRadius: 20,
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    scanBtnText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    listSection: { flex: 1 },
+    listTitle: { fontSize: 16, fontWeight: '700', color: c.text, marginHorizontal: 24, marginBottom: 8 },
+    listContent: { paddingBottom: 120 },
+    emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 },
+    emptyIcon: { fontSize: 48, marginBottom: 12 },
+    emptyText: { fontSize: 15, color: c.textSecondary, textAlign: 'center', maxWidth: 220 },
+    photoBar: {
+      position: 'absolute', bottom: 24, left: 24, right: 24,
+      backgroundColor: c.surface, borderRadius: 20,
+      flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12,
+      shadowColor: c.cardShadow, shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1, shadowRadius: 16, elevation: 6,
+    },
+    photoSourceBtn: { flex: 1, alignItems: 'center', gap: 4 },
+    photoSourceIcon: { fontSize: 22 },
+    photoSourceText: { fontSize: 12, fontWeight: '700', color: c.text },
+    photoSkipBtn: { paddingHorizontal: 12, paddingVertical: 8 },
+    photoSkipText: { fontSize: 13, color: c.textMuted, fontWeight: '500' },
 
-  recurBar: {
-    position: 'absolute', bottom: 24, left: 24, right: 24,
-    backgroundColor: Colors.surface, borderRadius: 20,
-    flexDirection: 'row', alignItems: 'center', padding: 16, gap: 10,
-    shadowColor: Colors.cardShadow, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1, shadowRadius: 16, elevation: 6,
-  },
-  recurInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  recurIcon: { fontSize: 20, color: Colors.primary },
-  recurTitle: { fontSize: 13, fontWeight: '700', color: Colors.text, maxWidth: 140 },
-  recurMeta: { fontSize: 12, color: Colors.textMuted, marginTop: 1 },
-  recurConfirmBtn: { backgroundColor: Colors.successLight, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
-  recurConfirmText: { fontSize: 12, fontWeight: '700', color: '#2D7A4F' },
-  recurSkipBtn: { paddingHorizontal: 6, paddingVertical: 8 },
-  recurSkipText: { fontSize: 12, color: Colors.textMuted },
+    recurBar: {
+      position: 'absolute', bottom: 24, left: 24, right: 24,
+      backgroundColor: c.surface, borderRadius: 20,
+      flexDirection: 'row', alignItems: 'center', padding: 16, gap: 10,
+      shadowColor: c.cardShadow, shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1, shadowRadius: 16, elevation: 6,
+    },
+    recurInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    recurIcon: { fontSize: 20, color: c.primary },
+    recurTitle: { fontSize: 13, fontWeight: '700', color: c.text, maxWidth: 140 },
+    recurMeta: { fontSize: 12, color: c.textMuted, marginTop: 1 },
+    recurConfirmBtn: { backgroundColor: c.successLight, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
+    recurConfirmText: { fontSize: 12, fontWeight: '700', color: '#2D7A4F' },
+    recurSkipBtn: { paddingHorizontal: 6, paddingVertical: 8 },
+    recurSkipText: { fontSize: 12, color: c.textMuted },
 
-  noWsBanner: {
-    marginHorizontal: 24, marginVertical: 4,
-    backgroundColor: Colors.expenseLight, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10,
-  },
-  noWsText: { fontSize: 13, fontWeight: '600', color: Colors.expense, textAlign: 'center' },
-});
+    noWsBanner: {
+      marginHorizontal: 24, marginVertical: 4,
+      backgroundColor: c.expenseLight, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10,
+    },
+    noWsText: { fontSize: 13, fontWeight: '600', color: c.expense, textAlign: 'center' },
+  });
+}

@@ -10,11 +10,14 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 
 type Mode = 'login' | 'register' | 'reset';
 
 export function AuthScreen() {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -111,7 +114,7 @@ export function AuthScreen() {
               <TextInput
                 style={[styles.input, styles.resetInput]}
                 placeholder="Email"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -166,7 +169,7 @@ export function AuthScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Email"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -176,7 +179,7 @@ export function AuthScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Mot de passe"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -215,163 +218,165 @@ export function AuthScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  logoIcon: {
-    fontSize: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginTop: 6,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 4,
-  },
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 24,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  tabActive: {
-    backgroundColor: Colors.surface,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-  },
-  tabTextActive: {
-    color: Colors.primary,
-  },
-  form: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  input: {
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: Colors.text,
-  },
-  messageBanner: {
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-  },
-  messageBannerError: {
-    backgroundColor: Colors.expenseLight,
-  },
-  messageBannerSuccess: {
-    backgroundColor: Colors.successLight,
-  },
-  messageText: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  messageTextError: {
-    color: '#D64545',
-  },
-  messageTextSuccess: {
-    color: '#2D7A4F',
-  },
-  button: {
-    backgroundColor: Colors.primary,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  forgotLink: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  forgotLinkText: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '500',
-  },
-  resetTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  resetSubtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  resetInput: {
-    marginBottom: 16,
-  },
-  backLink: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  backLinkText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-});
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    scroll: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      padding: 24,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: 40,
+    },
+    logoContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 24,
+      backgroundColor: c.primaryLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 16,
+    },
+    logoIcon: {
+      fontSize: 40,
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.5,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: c.textSecondary,
+      marginTop: 6,
+    },
+    card: {
+      backgroundColor: c.surface,
+      borderRadius: 24,
+      padding: 24,
+      shadowColor: c.cardShadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 20,
+      elevation: 4,
+    },
+    tabs: {
+      flexDirection: 'row',
+      backgroundColor: c.surfaceAlt,
+      borderRadius: 12,
+      padding: 4,
+      marginBottom: 24,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    tabActive: {
+      backgroundColor: c.surface,
+      shadowColor: c.cardShadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    tabText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textSecondary,
+    },
+    tabTextActive: {
+      color: c.primary,
+    },
+    form: {
+      gap: 12,
+      marginBottom: 16,
+    },
+    input: {
+      backgroundColor: c.surfaceAlt,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: c.text,
+    },
+    messageBanner: {
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 16,
+    },
+    messageBannerError: {
+      backgroundColor: c.expenseLight,
+    },
+    messageBannerSuccess: {
+      backgroundColor: c.successLight,
+    },
+    messageText: {
+      fontSize: 14,
+      textAlign: 'center',
+      fontWeight: '500',
+    },
+    messageTextError: {
+      color: '#D64545',
+    },
+    messageTextSuccess: {
+      color: '#2D7A4F',
+    },
+    button: {
+      backgroundColor: c.primary,
+      borderRadius: 14,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    forgotLink: {
+      marginTop: 16,
+      alignItems: 'center',
+    },
+    forgotLinkText: {
+      fontSize: 14,
+      color: c.primary,
+      fontWeight: '500',
+    },
+    resetTitle: {
+      fontSize: 20,
+      fontWeight: '800',
+      color: c.text,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    resetSubtitle: {
+      fontSize: 14,
+      color: c.textSecondary,
+      textAlign: 'center',
+      lineHeight: 20,
+      marginBottom: 24,
+    },
+    resetInput: {
+      marginBottom: 16,
+    },
+    backLink: {
+      marginTop: 16,
+      alignItems: 'center',
+    },
+    backLinkText: {
+      fontSize: 14,
+      color: c.textSecondary,
+      fontWeight: '500',
+    },
+  });
+}

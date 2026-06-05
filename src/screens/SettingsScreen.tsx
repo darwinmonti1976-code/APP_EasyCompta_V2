@@ -14,7 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../lib/WorkspaceContext';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 import { Workspace, WorkspaceMember } from '../lib/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -29,13 +30,14 @@ const WS_TYPE_LABELS: Record<Workspace['type'], string> = {
   business: '💼 Pro',
 };
 
-const WS_TYPE_COLORS: Record<Workspace['type'], string> = {
-  personal: Colors.primaryLight,
-  family: Colors.successLight,
-  business: Colors.debtLight,
-};
-
 export function SettingsScreen({ navigation }: Props) {
+  const { colors, themeMode, setThemeMode } = useTheme();
+  const styles = makeStyles(colors);
+  const WS_TYPE_COLORS: Record<Workspace['type'], string> = {
+    personal: colors.primaryLight,
+    family: colors.successLight,
+    business: colors.debtLight,
+  };
   const { workspaces, activeWorkspace, pendingInvitations, switchWorkspace,
     createWorkspace, inviteMember, acceptInvitation, declineInvitation,
     leaveWorkspace, deleteWorkspace, removeMember, renameWorkspace,
@@ -295,7 +297,7 @@ export function SettingsScreen({ navigation }: Props) {
                 <TextInput
                   style={styles.inviteInput}
                   placeholder="Nom de l'espace (optionnel)"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={newWsName}
                   onChangeText={setNewWsName}
                   maxLength={40}
@@ -382,7 +384,7 @@ export function SettingsScreen({ navigation }: Props) {
               <TextInput
                 style={styles.inviteInput}
                 placeholder="Email de la personne"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={inviteEmail}
                 onChangeText={setInviteEmail}
                 keyboardType="email-address"
@@ -424,6 +426,23 @@ export function SettingsScreen({ navigation }: Props) {
             </View>
           </Section>
 
+          {/* Thème */}
+          <Section title="Thème">
+            <View style={styles.currencyRow}>
+              {(['system', 'light', 'dark'] as const).map(mode => (
+                <TouchableOpacity
+                  key={mode}
+                  style={[styles.currencyChip, themeMode === mode && styles.currencyChipActive]}
+                  onPress={() => setThemeMode(mode)}
+                >
+                  <Text style={[styles.currencyChipText, themeMode === mode && styles.currencyChipTextActive]}>
+                    {mode === 'system' ? 'Système' : mode === 'light' ? 'Clair' : 'Sombre'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Section>
+
           {/* Logout */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <Text style={styles.logoutText}>Se déconnecter</Text>
@@ -435,6 +454,8 @@ export function SettingsScreen({ navigation }: Props) {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -443,155 +464,157 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surface,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  backIcon: { fontSize: 20, color: Colors.text },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  scroll: { padding: 16, paddingBottom: 48, gap: 20 },
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    backButton: {
+      width: 40, height: 40, borderRadius: 12,
+      backgroundColor: c.surface,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    backIcon: { fontSize: 20, color: c.text },
+    title: { fontSize: 18, fontWeight: '700', color: c.text },
+    scroll: { padding: 16, paddingBottom: 48, gap: 20 },
 
-  section: { gap: 8 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: Colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 4 },
-  sectionCard: { backgroundColor: Colors.surface, borderRadius: 20, padding: 16, gap: 12 },
+    section: { gap: 8 },
+    sectionTitle: { fontSize: 13, fontWeight: '700', color: c.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 4 },
+    sectionCard: { backgroundColor: c.surface, borderRadius: 20, padding: 16, gap: 12 },
 
-  emailRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  emailIcon: { fontSize: 18 },
-  emailText: { fontSize: 15, color: Colors.text, fontWeight: '500', flex: 1 },
+    emailRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    emailIcon: { fontSize: 18 },
+    emailText: { fontSize: 15, color: c.text, fontWeight: '500', flex: 1 },
 
-  invitationRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  invitationWsName: { fontSize: 14, fontWeight: '600', color: Colors.text },
-  invitationMeta: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
-  acceptButton: {
-    backgroundColor: Colors.successLight,
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 10,
-  },
-  acceptButtonText: { fontSize: 13, fontWeight: '700', color: '#2D7A4F' },
-  declineButton: {
-    backgroundColor: Colors.expenseLight,
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 10,
-  },
-  declineButtonText: { fontSize: 13, fontWeight: '700', color: Colors.expense },
-  leaveButton: {
-    paddingHorizontal: 10, paddingVertical: 6,
-    borderRadius: 8, borderWidth: 1, borderColor: Colors.expenseLight,
-  },
-  leaveButtonText: { fontSize: 11, fontWeight: '600', color: Colors.expense },
-  deleteWsButton: {
-    paddingHorizontal: 8, paddingVertical: 6,
-    borderRadius: 8, borderWidth: 1, borderColor: Colors.expenseLight,
-  },
-  deleteWsButtonText: { fontSize: 13 },
-  memberRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-  },
-  memberEmail: { fontSize: 14, color: Colors.text, flex: 1 },
-  memberRole: { fontSize: 12, color: Colors.textMuted, fontWeight: '500' },
-  renameInput: {
-    flex: 1, fontSize: 14, color: Colors.text,
-    backgroundColor: Colors.surfaceAlt, borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 4,
-  },
-  renameConfirm: { fontSize: 16, color: Colors.primary, fontWeight: '700', paddingHorizontal: 6 },
-  renameCancel: { fontSize: 14, color: Colors.textMuted, paddingHorizontal: 4 },
-  renameIcon: { fontSize: 13, color: Colors.textMuted, paddingHorizontal: 4 },
-  removeMemberBtn: {
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8, borderWidth: 1, borderColor: Colors.expenseLight,
-  },
-  removeMemberText: { fontSize: 11, fontWeight: '600', color: Colors.expense },
+    invitationRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    invitationWsName: { fontSize: 14, fontWeight: '600', color: c.text },
+    invitationMeta: { fontSize: 12, color: c.textMuted, marginTop: 2 },
+    acceptButton: {
+      backgroundColor: c.successLight,
+      paddingHorizontal: 14, paddingVertical: 8,
+      borderRadius: 10,
+    },
+    acceptButtonText: { fontSize: 13, fontWeight: '700', color: '#2D7A4F' },
+    declineButton: {
+      backgroundColor: c.expenseLight,
+      paddingHorizontal: 14, paddingVertical: 8,
+      borderRadius: 10,
+    },
+    declineButtonText: { fontSize: 13, fontWeight: '700', color: c.expense },
+    leaveButton: {
+      paddingHorizontal: 10, paddingVertical: 6,
+      borderRadius: 8, borderWidth: 1, borderColor: c.expenseLight,
+    },
+    leaveButtonText: { fontSize: 11, fontWeight: '600', color: c.expense },
+    deleteWsButton: {
+      paddingHorizontal: 8, paddingVertical: 6,
+      borderRadius: 8, borderWidth: 1, borderColor: c.expenseLight,
+    },
+    deleteWsButtonText: { fontSize: 13 },
+    memberRow: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+    },
+    memberEmail: { fontSize: 14, color: c.text, flex: 1 },
+    memberRole: { fontSize: 12, color: c.textMuted, fontWeight: '500' },
+    renameInput: {
+      flex: 1, fontSize: 14, color: c.text,
+      backgroundColor: c.surfaceAlt, borderRadius: 8,
+      paddingHorizontal: 8, paddingVertical: 4,
+    },
+    renameConfirm: { fontSize: 16, color: c.primary, fontWeight: '700', paddingHorizontal: 6 },
+    renameCancel: { fontSize: 14, color: c.textMuted, paddingHorizontal: 4 },
+    renameIcon: { fontSize: 13, color: c.textMuted, paddingHorizontal: 4 },
+    removeMemberBtn: {
+      paddingHorizontal: 10, paddingVertical: 5,
+      borderRadius: 8, borderWidth: 1, borderColor: c.expenseLight,
+    },
+    removeMemberText: { fontSize: 11, fontWeight: '600', color: c.expense },
 
-  workspaceRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    padding: 10, borderRadius: 12,
-  },
-  workspaceRowActive: { backgroundColor: Colors.primaryLight },
-  wsTypeBadge: {
-    paddingHorizontal: 8, paddingVertical: 4,
-    borderRadius: 8,
-  },
-  wsTypeText: { fontSize: 12, fontWeight: '600', color: Colors.text },
-  wsName: { flex: 1, fontSize: 14, fontWeight: '500', color: Colors.textSecondary },
-  wsNameActive: { color: Colors.primary, fontWeight: '700' },
-  activeCheck: { fontSize: 16, color: Colors.primary, fontWeight: '700' },
+    workspaceRow: {
+      flexDirection: 'row', alignItems: 'center', gap: 10,
+      padding: 10, borderRadius: 12,
+    },
+    workspaceRowActive: { backgroundColor: c.primaryLight },
+    wsTypeBadge: {
+      paddingHorizontal: 8, paddingVertical: 4,
+      borderRadius: 8,
+    },
+    wsTypeText: { fontSize: 12, fontWeight: '600', color: c.text },
+    wsName: { flex: 1, fontSize: 14, fontWeight: '500', color: c.textSecondary },
+    wsNameActive: { color: c.primary, fontWeight: '700' },
+    activeCheck: { fontSize: 16, color: c.primary, fontWeight: '700' },
 
-  addWsButton: {
-    paddingVertical: 10, alignItems: 'center',
-    borderRadius: 10, borderWidth: 1.5,
-    borderColor: Colors.border, borderStyle: 'dashed',
-  },
-  addWsButtonText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
+    addWsButton: {
+      paddingVertical: 10, alignItems: 'center',
+      borderRadius: 10, borderWidth: 1.5,
+      borderColor: c.border, borderStyle: 'dashed',
+    },
+    addWsButtonText: { fontSize: 14, color: c.textSecondary, fontWeight: '600' },
 
-  createModal: { gap: 12 },
-  createModalTitle: { fontSize: 14, fontWeight: '700', color: Colors.text },
-  typeRow: { flexDirection: 'row', gap: 8 },
-  typeChip: {
-    flex: 1, paddingVertical: 10, alignItems: 'center',
-    borderRadius: 10, backgroundColor: Colors.surfaceAlt,
-  },
-  typeChipActive: { backgroundColor: Colors.primaryLight },
-  typeChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  typeChipTextActive: { color: Colors.primary },
-  createActions: { flexDirection: 'row', gap: 8 },
-  cancelButton: {
-    flex: 1, paddingVertical: 12, alignItems: 'center',
-    borderRadius: 10, backgroundColor: Colors.surfaceAlt,
-  },
-  cancelButtonText: { fontSize: 14, fontWeight: '600', color: Colors.textSecondary },
-  confirmButton: {
-    flex: 1, paddingVertical: 12, alignItems: 'center',
-    borderRadius: 10, backgroundColor: Colors.primary,
-  },
-  confirmButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+    createModal: { gap: 12 },
+    createModalTitle: { fontSize: 14, fontWeight: '700', color: c.text },
+    typeRow: { flexDirection: 'row', gap: 8 },
+    typeChip: {
+      flex: 1, paddingVertical: 10, alignItems: 'center',
+      borderRadius: 10, backgroundColor: c.surfaceAlt,
+    },
+    typeChipActive: { backgroundColor: c.primaryLight },
+    typeChipText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    typeChipTextActive: { color: c.primary },
+    createActions: { flexDirection: 'row', gap: 8 },
+    cancelButton: {
+      flex: 1, paddingVertical: 12, alignItems: 'center',
+      borderRadius: 10, backgroundColor: c.surfaceAlt,
+    },
+    cancelButtonText: { fontSize: 14, fontWeight: '600', color: c.textSecondary },
+    confirmButton: {
+      flex: 1, paddingVertical: 12, alignItems: 'center',
+      borderRadius: 10, backgroundColor: c.primary,
+    },
+    confirmButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
 
-  inviteHint: { fontSize: 13, color: Colors.textMuted, lineHeight: 18 },
-  wsSelector: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  wsSelectorChip: {
-    paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 10, backgroundColor: Colors.surfaceAlt,
-  },
-  wsSelectorChipActive: { backgroundColor: Colors.primaryLight },
-  wsSelectorText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  wsSelectorTextActive: { color: Colors.primary },
-  inviteRow: { flexDirection: 'row', gap: 8 },
-  inviteInput: {
-    flex: 1, backgroundColor: Colors.surfaceAlt,
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 14, color: Colors.text,
-  },
-  sendButton: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 16, borderRadius: 12,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  sendButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
-  inviteMsgText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
+    inviteHint: { fontSize: 13, color: c.textMuted, lineHeight: 18 },
+    wsSelector: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    wsSelectorChip: {
+      paddingHorizontal: 12, paddingVertical: 6,
+      borderRadius: 10, backgroundColor: c.surfaceAlt,
+    },
+    wsSelectorChipActive: { backgroundColor: c.primaryLight },
+    wsSelectorText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    wsSelectorTextActive: { color: c.primary },
+    inviteRow: { flexDirection: 'row', gap: 8 },
+    inviteInput: {
+      flex: 1, backgroundColor: c.surfaceAlt,
+      borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
+      fontSize: 14, color: c.text,
+    },
+    sendButton: {
+      backgroundColor: c.primary,
+      paddingHorizontal: 16, borderRadius: 12,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    sendButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+    inviteMsgText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
 
-  currencyHint: { fontSize: 13, color: Colors.textMuted, lineHeight: 18, marginBottom: 12 },
-  currencyRow: { flexDirection: 'row', gap: 10 },
-  currencyChip: {
-    flex: 1, paddingVertical: 12, borderRadius: 12,
-    backgroundColor: Colors.surfaceAlt, alignItems: 'center',
-  },
-  currencyChipActive: { backgroundColor: Colors.primary },
-  currencyChipText: { fontSize: 15, fontWeight: '700', color: Colors.textSecondary },
-  currencyChipTextActive: { color: '#FFFFFF' },
-  logoutButton: {
-    backgroundColor: Colors.surface, borderRadius: 16,
-    paddingVertical: 16, alignItems: 'center',
-    borderWidth: 1, borderColor: Colors.expenseLight,
-  },
-  logoutText: { fontSize: 16, fontWeight: '700', color: '#D64545' },
-});
+    currencyHint: { fontSize: 13, color: c.textMuted, lineHeight: 18, marginBottom: 12 },
+    currencyRow: { flexDirection: 'row', gap: 10 },
+    currencyChip: {
+      flex: 1, paddingVertical: 12, borderRadius: 12,
+      backgroundColor: c.surfaceAlt, alignItems: 'center',
+    },
+    currencyChipActive: { backgroundColor: c.primary },
+    currencyChipText: { fontSize: 15, fontWeight: '700', color: c.textSecondary },
+    currencyChipTextActive: { color: '#FFFFFF' },
+    logoutButton: {
+      backgroundColor: c.surface, borderRadius: 16,
+      paddingVertical: 16, alignItems: 'center',
+      borderWidth: 1, borderColor: c.expenseLight,
+    },
+    logoutText: { fontSize: 16, fontWeight: '700', color: '#D64545' },
+  });
+}

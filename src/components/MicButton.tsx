@@ -5,7 +5,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 
 interface Props {
   isRecording: boolean;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function MicButton({ isRecording, isProcessing, onPressIn, onPressOut }: Props) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -70,10 +73,10 @@ export function MicButton({ isRecording, isProcessing, onPressIn, onPressOut }: 
   }, [isRecording]);
 
   const buttonColor = isRecording
-    ? Colors.mic.recording
+    ? colors.mic.recording
     : isProcessing
-    ? Colors.textMuted
-    : Colors.mic.idle;
+    ? colors.textMuted
+    : colors.mic.idle;
 
   return (
     <View style={styles.container}>
@@ -83,7 +86,7 @@ export function MicButton({ isRecording, isProcessing, onPressIn, onPressOut }: 
           {
             transform: [{ scale: pulseAnim }],
             opacity: opacityAnim,
-            backgroundColor: isRecording ? Colors.mic.recording : Colors.mic.pulse,
+            backgroundColor: isRecording ? colors.mic.recording : colors.mic.pulse,
           },
         ]}
       />
@@ -93,14 +96,14 @@ export function MicButton({ isRecording, isProcessing, onPressIn, onPressOut }: 
           onPressOut={isProcessing ? undefined : onPressOut}
           style={[styles.button, { backgroundColor: buttonColor }]}
         >
-          <MicIcon isRecording={isRecording} isProcessing={isProcessing} />
+          <MicIcon isRecording={isRecording} isProcessing={isProcessing} styles={styles} />
         </Pressable>
       </Animated.View>
     </View>
   );
 }
 
-function MicIcon({ isRecording, isProcessing }: { isRecording: boolean; isProcessing: boolean }) {
+function MicIcon({ isRecording, isProcessing, styles }: { isRecording: boolean; isProcessing: boolean; styles: ReturnType<typeof makeStyles> }) {
   const dotAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -139,51 +142,53 @@ function MicSVG({ color, size }: { color: string; size: number }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 160,
-    height: 160,
-  },
-  pulse: {
-    position: 'absolute',
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-  },
-  button: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  icon: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  micBody: {
-    width: 18,
-    height: 26,
-    borderRadius: 9,
-    borderWidth: 3,
-    marginBottom: 2,
-  },
-  micStand: {
-    width: 2,
-    height: 8,
-  },
-  micBase: {
-    width: 18,
-    height: 2,
-    borderRadius: 1,
-    marginTop: -1,
-  },
-});
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 160,
+      height: 160,
+    },
+    pulse: {
+      position: 'absolute',
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+    },
+    button: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: c.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    icon: {
+      color: '#FFFFFF',
+      fontSize: 28,
+      fontWeight: '700',
+    },
+    micBody: {
+      width: 18,
+      height: 26,
+      borderRadius: 9,
+      borderWidth: 3,
+      marginBottom: 2,
+    },
+    micStand: {
+      width: 2,
+      height: 8,
+    },
+    micBase: {
+      width: 18,
+      height: 2,
+      borderRadius: 1,
+      marginTop: -1,
+    },
+  });
+}

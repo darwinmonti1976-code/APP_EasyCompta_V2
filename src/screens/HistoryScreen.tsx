@@ -21,7 +21,8 @@ import * as Print from 'expo-print';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../lib/WorkspaceContext';
 import { useBudgets } from '../lib/useBudgets';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 import { TransactionCard } from '../components/TransactionCard';
 import { Transaction, TransactionType } from '../lib/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -130,6 +131,8 @@ function buildCsv(rows: Transaction[]): string {
 }
 
 export function HistoryScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const { activeWorkspace } = useWorkspace();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -414,7 +417,7 @@ export function HistoryScreen({ navigation }: Props) {
         <TextInput
           style={styles.searchInput}
           placeholder="Rechercher…"
-          placeholderTextColor={Colors.textMuted}
+          placeholderTextColor={colors.textMuted}
           value={search}
           onChangeText={setSearch}
           clearButtonMode="while-editing"
@@ -432,12 +435,12 @@ export function HistoryScreen({ navigation }: Props) {
         {([null, 'expense', 'income', 'debt', 'transfer'] as (TransactionType | null)[]).map(t => {
           const active = typeFilter === t;
           const CHIP_COLORS: Record<string, { bg: string; text: string }> = {
-            expense:  { bg: Colors.expenseLight,  text: Colors.expense },
-            income:   { bg: Colors.incomeLight,   text: '#1B5E20' },
-            debt:     { bg: Colors.debtLight,     text: '#7A4F00' },
-            transfer: { bg: Colors.primaryLight,  text: Colors.primaryDark },
+            expense:  { bg: colors.expenseLight,  text: colors.expense },
+            income:   { bg: colors.incomeLight,   text: '#1B5E20' },
+            debt:     { bg: colors.debtLight,     text: '#7A4F00' },
+            transfer: { bg: colors.primaryLight,  text: colors.primaryDark },
           };
-          const activePalette = t ? CHIP_COLORS[t] : { bg: Colors.primary, text: '#FFFFFF' };
+          const activePalette = t ? CHIP_COLORS[t] : { bg: colors.primary, text: '#FFFFFF' };
           const bg        = active ? activePalette.bg   : '#E8EAF0';
           const textColor = active ? activePalette.text : '#4A5568';
           return (
@@ -459,21 +462,21 @@ export function HistoryScreen({ navigation }: Props) {
         <View style={styles.summaryBar}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Dépenses</Text>
-            <Text style={[styles.summaryValue, { color: Colors.expense }]}>
+            <Text style={[styles.summaryValue, { color: colors.expense }]}>
               -{totalExpense.toFixed(2)}
             </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Revenus</Text>
-            <Text style={[styles.summaryValue, { color: Colors.success }]}>
+            <Text style={[styles.summaryValue, { color: colors.success }]}>
               +{totalIncome.toFixed(2)}
             </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Solde</Text>
-            <Text style={[styles.summaryValue, { color: Colors.text }]}>
+            <Text style={[styles.summaryValue, { color: colors.text }]}>
               {(totalIncome - totalExpense).toFixed(2)}
             </Text>
           </View>
@@ -512,8 +515,8 @@ export function HistoryScreen({ navigation }: Props) {
                     const budget = budgets[cat];
                     const pct = budget ? Math.min(amount / budget, 1) : amount / maxCat;
                     const barColor = budget
-                      ? pct >= 1 ? Colors.expense : pct >= 0.8 ? Colors.debt : Colors.primary
-                      : Colors.primary;
+                      ? pct >= 1 ? colors.expense : pct >= 0.8 ? colors.debt : colors.primary
+                      : colors.primary;
                     return (
                       <TouchableOpacity
                         key={cat}
@@ -530,7 +533,7 @@ export function HistoryScreen({ navigation }: Props) {
                             <Text style={styles.budgetLabel}>{amount.toFixed(0)} / {budget} CHF</Text>
                           ) : null}
                         </View>
-                        <Text style={[styles.catAmount, (budget !== undefined && amount >= budget) ? { color: Colors.expense } : null]}>
+                        <Text style={[styles.catAmount, (budget !== undefined && amount >= budget) ? { color: colors.expense } : null]}>
                           {amount.toFixed(0)}
                         </Text>
                       </TouchableOpacity>
@@ -600,7 +603,7 @@ export function HistoryScreen({ navigation }: Props) {
             loadingMore ? (
               <ActivityIndicator
                 size="small"
-                color={Colors.primary}
+                color={colors.primary}
                 style={{ paddingVertical: 16 }}
               />
             ) : null
@@ -634,7 +637,7 @@ export function HistoryScreen({ navigation }: Props) {
                     value={editForm.date}
                     onChangeText={v => setEditForm(f => ({ ...f, date: v }))}
                     placeholder="ex: 28.05.2025"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="numeric"
                   />
 
@@ -644,7 +647,7 @@ export function HistoryScreen({ navigation }: Props) {
                     value={editForm.description}
                     onChangeText={v => setEditForm(f => ({ ...f, description: v }))}
                     placeholder="Description"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                   />
 
                   <Text style={styles.editLabel}>Montant</Text>
@@ -654,7 +657,7 @@ export function HistoryScreen({ navigation }: Props) {
                     onChangeText={v => setEditForm(f => ({ ...f, amount: v }))}
                     keyboardType="decimal-pad"
                     placeholder="0.00"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                   />
 
                   <Text style={styles.editLabel}>Catégorie</Text>
@@ -663,7 +666,7 @@ export function HistoryScreen({ navigation }: Props) {
                     value={editForm.category}
                     onChangeText={v => setEditForm(f => ({ ...f, category: v }))}
                     placeholder="Catégorie"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                   />
 
                   <Text style={styles.editLabel}>Type</Text>
@@ -785,7 +788,7 @@ export function HistoryScreen({ navigation }: Props) {
                   onChangeText={v => setBudgetTarget(t => t ? { ...t, current: v } : null)}
                   keyboardType="decimal-pad"
                   placeholder="Montant CHF"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   autoFocus
                 />
                 <View style={styles.editActions}>
@@ -794,7 +797,7 @@ export function HistoryScreen({ navigation }: Props) {
                       removeBudget(budgetTarget.cat);
                       setBudgetTarget(null);
                     }}>
-                      <Text style={[styles.cancelBtnText, { color: Colors.expense }]}>Supprimer</Text>
+                      <Text style={[styles.cancelBtnText, { color: colors.expense }]}>Supprimer</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity style={styles.cancelBtn} onPress={() => setBudgetTarget(null)}>
@@ -844,6 +847,8 @@ export function HistoryScreen({ navigation }: Props) {
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -852,209 +857,211 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  backButton: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surface, alignItems: 'center', justifyContent: 'center',
-  },
-  backIcon: { fontSize: 20, color: Colors.text },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  searchRow: { paddingHorizontal: 16, marginBottom: 6 },
-  searchInput: {
-    backgroundColor: Colors.surface, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 10,
-    fontSize: 14, color: Colors.text,
-    borderWidth: 1, borderColor: Colors.border,
-  },
-  typeFilterScroll: { flexShrink: 0, marginBottom: 8 },
-  typeFilterRow: { paddingHorizontal: 16, paddingVertical: 4, alignItems: 'center' },
-  typeChip: {
-    paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20,
-    marginRight: 8,
-  },
-  typeChipText: { fontSize: 13 },
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: 16, paddingVertical: 12,
+    },
+    backButton: {
+      width: 40, height: 40, borderRadius: 12,
+      backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center',
+    },
+    backIcon: { fontSize: 20, color: c.text },
+    title: { fontSize: 18, fontWeight: '700', color: c.text },
+    searchRow: { paddingHorizontal: 16, marginBottom: 6 },
+    searchInput: {
+      backgroundColor: c.surface, borderRadius: 12,
+      paddingHorizontal: 14, paddingVertical: 10,
+      fontSize: 14, color: c.text,
+      borderWidth: 1, borderColor: c.border,
+    },
+    typeFilterScroll: { flexShrink: 0, marginBottom: 8 },
+    typeFilterRow: { paddingHorizontal: 16, paddingVertical: 4, alignItems: 'center' },
+    typeChip: {
+      paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20,
+      marginRight: 8,
+    },
+    typeChipText: { fontSize: 13 },
 
-  exportRow: { flexDirection: 'row', gap: 8 },
-  exportButton: {
-    backgroundColor: Colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-  },
-  exportText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
-  exportButtonCSV: {
-    backgroundColor: Colors.primaryLight, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-  },
-  exportTextCSV: { fontSize: 13, fontWeight: '700', color: Colors.primary },
+    exportRow: { flexDirection: 'row', gap: 8 },
+    exportButton: {
+      backgroundColor: c.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
+    },
+    exportText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+    exportButtonCSV: {
+      backgroundColor: c.primaryLight, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
+    },
+    exportTextCSV: { fontSize: 13, fontWeight: '700', color: c.primary },
 
-  periodRow: {
-    flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8,
-  },
-  periodChip: {
-    flex: 1, paddingVertical: 7, borderRadius: 10,
-    backgroundColor: Colors.surface, alignItems: 'center',
-  },
-  periodChipActive: { backgroundColor: Colors.primary },
-  periodText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
-  periodTextActive: { color: '#FFFFFF' },
+    periodRow: {
+      flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8,
+    },
+    periodChip: {
+      flex: 1, paddingVertical: 7, borderRadius: 10,
+      backgroundColor: c.surface, alignItems: 'center',
+    },
+    periodChipActive: { backgroundColor: c.primary },
+    periodText: { fontSize: 12, fontWeight: '600', color: c.textSecondary },
+    periodTextActive: { color: '#FFFFFF' },
 
-  summaryBar: {
-    flexDirection: 'row', marginHorizontal: 16, marginBottom: 8,
-    backgroundColor: Colors.surface, borderRadius: 14, padding: 12,
-  },
-  summaryItem: { flex: 1, alignItems: 'center', gap: 2 },
-  summaryDivider: { width: 1, backgroundColor: Colors.border, marginVertical: 4 },
-  summaryLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '600' },
-  summaryValue: { fontSize: 14, fontWeight: '800' },
+    summaryBar: {
+      flexDirection: 'row', marginHorizontal: 16, marginBottom: 8,
+      backgroundColor: c.surface, borderRadius: 14, padding: 12,
+    },
+    summaryItem: { flex: 1, alignItems: 'center', gap: 2 },
+    summaryDivider: { width: 1, backgroundColor: c.border, marginVertical: 4 },
+    summaryLabel: { fontSize: 11, color: c.textMuted, fontWeight: '600' },
+    summaryValue: { fontSize: 14, fontWeight: '800' },
 
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: Colors.textSecondary, fontSize: 15 },
-  emptyIcon: { fontSize: 48 },
-  emptyText: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', maxWidth: 200 },
-  photoViewer: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-  },
-  photoViewerClose: {
-    position: 'absolute',
-    top: 56,
-    right: 20,
-    zIndex: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoViewerCloseText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  photoViewerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  retryButton: {
-    marginTop: 4, backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
-  },
-  retryButtonText: { fontSize: 14, fontWeight: '700', color: Colors.primary },
-  listContent: { paddingVertical: 8, paddingBottom: 32 },
+    centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+    loadingText: { color: c.textSecondary, fontSize: 15 },
+    emptyIcon: { fontSize: 48 },
+    emptyText: { fontSize: 15, color: c.textSecondary, textAlign: 'center', maxWidth: 200 },
+    photoViewer: {
+      flex: 1,
+      backgroundColor: '#000',
+      justifyContent: 'center',
+    },
+    photoViewerClose: {
+      position: 'absolute',
+      top: 56,
+      right: 20,
+      zIndex: 10,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    photoViewerCloseText: {
+      color: '#fff',
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    photoViewerImage: {
+      width: '100%',
+      height: '100%',
+    },
+    retryButton: {
+      marginTop: 4, backgroundColor: c.primaryLight,
+      paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
+    },
+    retryButtonText: { fontSize: 14, fontWeight: '700', color: c.primary },
+    listContent: { paddingVertical: 8, paddingBottom: 32 },
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
-  modalCard: {
-    backgroundColor: Colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    padding: 28, paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 40, height: 4, backgroundColor: Colors.border, borderRadius: 2,
-    alignSelf: 'center', marginBottom: 24,
-  },
-  modalAmount: { fontSize: 36, fontWeight: '800', color: Colors.text, textAlign: 'center', marginBottom: 8 },
-  modalDescription: { fontSize: 18, color: Colors.textSecondary, textAlign: 'center', marginBottom: 20 },
-  attachmentImage: {
-    width: '100%', height: 160, borderRadius: 12, marginBottom: 20,
-  },
-  modalDetails: { gap: 14, marginBottom: 28 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  detailLabel: { fontSize: 14, color: Colors.textMuted, flex: 1 },
-  detailValue: { fontSize: 14, fontWeight: '600', color: Colors.text, flex: 2, textAlign: 'right' },
-  editButton: {
-    backgroundColor: Colors.primaryLight, borderRadius: 14, paddingVertical: 14,
-    alignItems: 'center', marginBottom: 10,
-  },
-  editButtonText: { fontSize: 15, fontWeight: '700', color: Colors.primary },
-  closeButton: {
-    backgroundColor: Colors.surfaceAlt, borderRadius: 14, paddingVertical: 14, alignItems: 'center',
-  },
-  closeButtonText: { fontSize: 16, fontWeight: '600', color: Colors.text },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
+    modalCard: {
+      backgroundColor: c.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+      padding: 28, paddingBottom: 40,
+    },
+    modalHandle: {
+      width: 40, height: 4, backgroundColor: c.border, borderRadius: 2,
+      alignSelf: 'center', marginBottom: 24,
+    },
+    modalAmount: { fontSize: 36, fontWeight: '800', color: c.text, textAlign: 'center', marginBottom: 8 },
+    modalDescription: { fontSize: 18, color: c.textSecondary, textAlign: 'center', marginBottom: 20 },
+    attachmentImage: {
+      width: '100%', height: 160, borderRadius: 12, marginBottom: 20,
+    },
+    modalDetails: { gap: 14, marginBottom: 28 },
+    detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    detailLabel: { fontSize: 14, color: c.textMuted, flex: 1 },
+    detailValue: { fontSize: 14, fontWeight: '600', color: c.text, flex: 2, textAlign: 'right' },
+    editButton: {
+      backgroundColor: c.primaryLight, borderRadius: 14, paddingVertical: 14,
+      alignItems: 'center', marginBottom: 10,
+    },
+    editButtonText: { fontSize: 15, fontWeight: '700', color: c.primary },
+    closeButton: {
+      backgroundColor: c.surfaceAlt, borderRadius: 14, paddingVertical: 14, alignItems: 'center',
+    },
+    closeButtonText: { fontSize: 16, fontWeight: '600', color: c.text },
 
-  editTitle: { fontSize: 18, fontWeight: '700', color: Colors.text, marginBottom: 20, textAlign: 'center' },
-  editLabel: { fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase' },
-  editInput: {
-    backgroundColor: Colors.surfaceAlt, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 15, color: Colors.text, marginBottom: 16,
-  },
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
-  typeBtn: {
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: Colors.surfaceAlt,
-  },
-  typeBtnActive: { backgroundColor: Colors.primary },
-  typeBtnText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  typeBtnTextActive: { color: '#FFFFFF' },
-  editActions: { flexDirection: 'row', gap: 12, marginBottom: 8 },
-  cancelBtn: {
-    flex: 1, backgroundColor: Colors.surfaceAlt, borderRadius: 14,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  cancelBtnText: { fontSize: 15, fontWeight: '600', color: Colors.text },
-  saveBtn: {
-    flex: 2, backgroundColor: Colors.primary, borderRadius: 14,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+    editTitle: { fontSize: 18, fontWeight: '700', color: c.text, marginBottom: 20, textAlign: 'center' },
+    editLabel: { fontSize: 12, fontWeight: '600', color: c.textMuted, marginBottom: 6, textTransform: 'uppercase' },
+    editInput: {
+      backgroundColor: c.surfaceAlt, borderRadius: 12,
+      paddingHorizontal: 14, paddingVertical: 12,
+      fontSize: 15, color: c.text, marginBottom: 16,
+    },
+    typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+    typeBtn: {
+      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+      backgroundColor: c.surfaceAlt,
+    },
+    typeBtnActive: { backgroundColor: c.primary },
+    typeBtnText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    typeBtnTextActive: { color: '#FFFFFF' },
+    editActions: { flexDirection: 'row', gap: 12, marginBottom: 8 },
+    cancelBtn: {
+      flex: 1, backgroundColor: c.surfaceAlt, borderRadius: 14,
+      paddingVertical: 14, alignItems: 'center',
+    },
+    cancelBtnText: { fontSize: 15, fontWeight: '600', color: c.text },
+    saveBtn: {
+      flex: 2, backgroundColor: c.primary, borderRadius: 14,
+      paddingVertical: 14, alignItems: 'center',
+    },
+    saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 
-  analyticsBtn: {
-    width: 36, height: 36, borderRadius: 10,
-    backgroundColor: Colors.surface, alignItems: 'center', justifyContent: 'center',
-  },
-  analyticsBtnActive: { backgroundColor: Colors.primary },
-  analyticsBtnText: { fontSize: 16 },
-  analyticsBtnTextActive: { fontSize: 16 },
+    analyticsBtn: {
+      width: 36, height: 36, borderRadius: 10,
+      backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center',
+    },
+    analyticsBtnActive: { backgroundColor: c.primary },
+    analyticsBtnText: { fontSize: 16 },
+    analyticsBtnTextActive: { fontSize: 16 },
 
-  analyticsPanel: {
-    marginHorizontal: 16, marginBottom: 8,
-    backgroundColor: Colors.surface, borderRadius: 14, padding: 16,
-  },
-  catRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  catName: { fontSize: 12, color: Colors.textSecondary, width: 80 },
-  barTrack: { flex: 1, height: 8, backgroundColor: Colors.surfaceAlt, borderRadius: 4, overflow: 'hidden' },
-  barFill: { height: 8, backgroundColor: Colors.primary, borderRadius: 4 },
-  catAmount: { fontSize: 12, fontWeight: '700', color: Colors.text, width: 48, textAlign: 'right' },
+    analyticsPanel: {
+      marginHorizontal: 16, marginBottom: 8,
+      backgroundColor: c.surface, borderRadius: 14, padding: 16,
+    },
+    catRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
+    catName: { fontSize: 12, color: c.textSecondary, width: 80 },
+    barTrack: { flex: 1, height: 8, backgroundColor: c.surfaceAlt, borderRadius: 4, overflow: 'hidden' },
+    barFill: { height: 8, backgroundColor: c.primary, borderRadius: 4 },
+    catAmount: { fontSize: 12, fontWeight: '700', color: c.text, width: 48, textAlign: 'right' },
 
-  deleteModalButton: {
-    backgroundColor: Colors.expenseLight, borderRadius: 14, paddingVertical: 14,
-    alignItems: 'center', marginBottom: 10,
-  },
-  deleteModalButtonText: { fontSize: 15, fontWeight: '700', color: Colors.expense },
+    deleteModalButton: {
+      backgroundColor: c.expenseLight, borderRadius: 14, paddingVertical: 14,
+      alignItems: 'center', marginBottom: 10,
+    },
+    deleteModalButtonText: { fontSize: 15, fontWeight: '700', color: c.expense },
 
-  budgetHint: { fontSize: 10, color: Colors.textMuted, textAlign: 'center', marginBottom: 10, fontStyle: 'italic' },
-  catBarCol: { flex: 1, gap: 2 },
-  budgetLabel: { fontSize: 9, color: Colors.textMuted },
-  budgetOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center', paddingHorizontal: 32,
-  },
-  budgetCard: {
-    backgroundColor: Colors.surface, borderRadius: 20, padding: 24,
-  },
-  budgetCardTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, textAlign: 'center', marginBottom: 4 },
-  budgetCardCat: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', marginBottom: 16 },
+    budgetHint: { fontSize: 10, color: c.textMuted, textAlign: 'center', marginBottom: 10, fontStyle: 'italic' },
+    catBarCol: { flex: 1, gap: 2 },
+    budgetLabel: { fontSize: 9, color: c.textMuted },
+    budgetOverlay: {
+      flex: 1, backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center', paddingHorizontal: 32,
+    },
+    budgetCard: {
+      backgroundColor: c.surface, borderRadius: 20, padding: 24,
+    },
+    budgetCardTitle: { fontSize: 16, fontWeight: '700', color: c.text, textAlign: 'center', marginBottom: 4 },
+    budgetCardCat: { fontSize: 13, color: c.textSecondary, textAlign: 'center', marginBottom: 16 },
 
-  analyticsTabs: { flexDirection: 'row', gap: 8, marginBottom: 14 },
-  analyticsTabBtn: {
-    flex: 1, paddingVertical: 7, borderRadius: 10,
-    backgroundColor: Colors.surfaceAlt, alignItems: 'center',
-  },
-  analyticsTabBtnActive: { backgroundColor: Colors.primary },
-  analyticsTabText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
-  analyticsTabTextActive: { color: '#FFFFFF' },
-  analyticsEmpty: { fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 8 },
+    analyticsTabs: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+    analyticsTabBtn: {
+      flex: 1, paddingVertical: 7, borderRadius: 10,
+      backgroundColor: c.surfaceAlt, alignItems: 'center',
+    },
+    analyticsTabBtnActive: { backgroundColor: c.primary },
+    analyticsTabText: { fontSize: 12, fontWeight: '600', color: c.textSecondary },
+    analyticsTabTextActive: { color: '#FFFFFF' },
+    analyticsEmpty: { fontSize: 13, color: c.textMuted, textAlign: 'center', paddingVertical: 8 },
 
-  trendRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  trendMonth: { fontSize: 11, fontWeight: '700', color: Colors.textMuted, width: 36 },
-  trendBars: { flex: 1, gap: 3 },
-  trendBarRow: { height: 7, backgroundColor: Colors.surfaceAlt, borderRadius: 4, overflow: 'hidden' },
-  trendBarExpense: { height: 7, backgroundColor: Colors.expense, borderRadius: 4 },
-  trendBarIncome:  { height: 7, backgroundColor: Colors.success, borderRadius: 4 },
-  trendAmounts: { width: 64, alignItems: 'flex-end', gap: 2 },
-  trendExpense: { fontSize: 10, fontWeight: '700', color: Colors.expense },
-  trendIncome:  { fontSize: 10, fontWeight: '700', color: Colors.success },
-});
+    trendRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
+    trendMonth: { fontSize: 11, fontWeight: '700', color: c.textMuted, width: 36 },
+    trendBars: { flex: 1, gap: 3 },
+    trendBarRow: { height: 7, backgroundColor: c.surfaceAlt, borderRadius: 4, overflow: 'hidden' },
+    trendBarExpense: { height: 7, backgroundColor: c.expense, borderRadius: 4 },
+    trendBarIncome:  { height: 7, backgroundColor: c.success, borderRadius: 4 },
+    trendAmounts: { width: 64, alignItems: 'flex-end', gap: 2 },
+    trendExpense: { fontSize: 10, fontWeight: '700', color: c.expense },
+    trendIncome:  { fontSize: 10, fontWeight: '700', color: c.success },
+  });
+}

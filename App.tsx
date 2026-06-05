@@ -8,6 +8,7 @@ import { Session } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './src/lib/supabase';
 import { WorkspaceProvider } from './src/lib/WorkspaceContext';
+import { ThemeProvider } from './src/lib/ThemeContext';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { MainScreen } from './src/screens/MainScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
@@ -127,6 +128,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <WorkspaceProvider
@@ -172,6 +174,7 @@ export default function App() {
           </WorkspaceProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

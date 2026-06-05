@@ -8,7 +8,8 @@ import {
   View,
   PanResponder,
 } from 'react-native';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 import { Transaction, TransactionType } from '../lib/types';
 
 interface Props {
@@ -17,13 +18,6 @@ interface Props {
   onPress: (transaction: Transaction) => void;
   showCreator?: boolean;
 }
-
-const TYPE_COLORS: Record<TransactionType, { bg: string; text: string }> = {
-  expense:  { bg: Colors.expenseLight,  text: Colors.expense },
-  income:   { bg: Colors.incomeLight,   text: Colors.income },
-  debt:     { bg: Colors.debtLight,     text: Colors.debt },
-  transfer: { bg: Colors.primaryLight,  text: Colors.primary },
-};
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('fr-CH', { day: 'numeric', month: 'short' });
@@ -39,6 +33,14 @@ function shortEmail(email: string): string {
 }
 
 export function TransactionCard({ transaction, onDelete, onPress, showCreator = false }: Props) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const TYPE_COLORS: Record<TransactionType, { bg: string; text: string }> = {
+    expense:  { bg: colors.expenseLight,  text: colors.expense },
+    income:   { bg: colors.incomeLight,   text: colors.income },
+    debt:     { bg: colors.debtLight,     text: colors.debt },
+    transfer: { bg: colors.primaryLight,  text: colors.primary },
+  };
   const translateX    = useRef(new Animated.Value(0)).current;
   const deleteOpacity = useRef(new Animated.Value(0)).current;
   const SWIPE_THRESHOLD = -80;
@@ -125,7 +127,7 @@ export function TransactionCard({ transaction, onDelete, onPress, showCreator = 
           {/* Amount */}
           <Text style={[
             styles.amount,
-            { color: transaction.type === 'income' ? Colors.success : Colors.text },
+            { color: transaction.type === 'income' ? colors.success : colors.text },
           ]}>
             {formatAmount(transaction.amount, transaction.type, transaction.currency)}
           </Text>
@@ -136,57 +138,59 @@ export function TransactionCard({ transaction, onDelete, onPress, showCreator = 
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    marginHorizontal: 16,
-    marginVertical: 4,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  deleteBackground: {
-    position: 'absolute', right: 0, top: 0, bottom: 0, width: 100,
-    backgroundColor: Colors.expense, alignItems: 'center', justifyContent: 'center', borderRadius: 16,
-  },
-  deleteText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    wrapper: {
+      marginHorizontal: 16,
+      marginVertical: 4,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    deleteBackground: {
+      position: 'absolute', right: 0, top: 0, bottom: 0, width: 100,
+      backgroundColor: c.expense, alignItems: 'center', justifyContent: 'center', borderRadius: 16,
+    },
+    deleteText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
 
-  card: {
-    backgroundColor: Colors.surface, borderRadius: 16,
-    shadowColor: Colors.cardShadow, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1, shadowRadius: 8, elevation: 2,
-  },
-  inner: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, paddingHorizontal: 14, gap: 10,
-  },
+    card: {
+      backgroundColor: c.surface, borderRadius: 16,
+      shadowColor: c.cardShadow, shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1, shadowRadius: 8, elevation: 2,
+    },
+    inner: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingVertical: 12, paddingHorizontal: 14, gap: 10,
+    },
 
-  categoryBadge: {
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 10, minWidth: 70, alignItems: 'center',
-  },
-  categoryText: { fontSize: 12, fontWeight: '600' },
+    categoryBadge: {
+      paddingHorizontal: 10, paddingVertical: 5,
+      borderRadius: 10, minWidth: 70, alignItems: 'center',
+    },
+    categoryText: { fontSize: 12, fontWeight: '600' },
 
-  info: { flex: 1 },
-  description: { fontSize: 14, fontWeight: '600', color: Colors.text, marginBottom: 4 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  date: { fontSize: 12, color: Colors.textMuted },
-  creatorBadge: {
-    backgroundColor: Colors.primaryLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6,
-  },
-  creatorText: { fontSize: 11, fontWeight: '600', color: Colors.primary },
+    info: { flex: 1 },
+    description: { fontSize: 14, fontWeight: '600', color: c.text, marginBottom: 4 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    date: { fontSize: 12, color: c.textMuted },
+    creatorBadge: {
+      backgroundColor: c.primaryLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6,
+    },
+    creatorText: { fontSize: 11, fontWeight: '600', color: c.primary },
 
-  thumbnail: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: Colors.surfaceAlt,
-  },
+    thumbnail: {
+      width: 44,
+      height: 44,
+      borderRadius: 8,
+      backgroundColor: c.surfaceAlt,
+    },
 
-  amount: { fontSize: 15, fontWeight: '700' },
+    amount: { fontSize: 15, fontWeight: '700' },
 
-  recurBadge: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  recurIcon: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
-});
+    recurBadge: {
+      width: 22, height: 22, borderRadius: 11,
+      backgroundColor: c.primaryLight,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    recurIcon: { fontSize: 12, color: c.primary, fontWeight: '700' },
+  });
+}

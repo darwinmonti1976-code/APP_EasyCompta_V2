@@ -8,41 +8,43 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../lib/ThemeContext';
+import { ColorTheme } from '../constants/colors';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
 export const ONBOARDING_KEY = '@onboarding_done';
-
-const SLIDES = [
-  {
-    icon: '🎙️',
-    color: Colors.primaryLight,
-    title: 'Parle pour noter',
-    body: 'Appuie longuement sur le micro et dis ce que tu as dépensé ou reçu.',
-    example: '"J\'ai payé 45 francs au supermarché"',
-  },
-  {
-    icon: '📊',
-    color: Colors.successLight,
-    title: 'Suis tes finances',
-    body: 'Historique complet, filtres par période, graphiques et export PDF ou CSV.',
-    example: null,
-  },
-  {
-    icon: '👨‍👩‍👧',
-    color: Colors.debtLight,
-    title: 'Partage en famille',
-    body: 'Crée des espaces famille ou pro pour suivre les finances ensemble.',
-    example: 'Invitations par email, transactions partagées en temps réel.',
-  },
-];
 
 interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
 }
 
 export function OnboardingScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const SLIDES = [
+    {
+      icon: '🎙️',
+      color: colors.primaryLight,
+      title: 'Parle pour noter',
+      body: 'Appuie longuement sur le micro et dis ce que tu as dépensé ou reçu.',
+      example: '"J\'ai payé 45 francs au supermarché"',
+    },
+    {
+      icon: '📊',
+      color: colors.successLight,
+      title: 'Suis tes finances',
+      body: 'Historique complet, filtres par période, graphiques et export PDF ou CSV.',
+      example: null,
+    },
+    {
+      icon: '👨‍👩‍👧',
+      color: colors.debtLight,
+      title: 'Partage en famille',
+      body: 'Crée des espaces famille ou pro pour suivre les finances ensemble.',
+      example: 'Invitations par email, transactions partagées en temps réel.',
+    },
+  ];
   const [current, setCurrent] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
@@ -112,101 +114,103 @@ export function OnboardingScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 32,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 32,
-  },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 40,
-  },
-  icon: {
-    fontSize: 56,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: -0.5,
-  },
-  body: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 300,
-  },
-  exampleBox: {
-    marginTop: 24,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  exampleText: {
-    fontSize: 15,
-    color: Colors.primary,
-    fontWeight: '600',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 32,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.border,
-  },
-  dotActive: {
-    width: 24,
-    backgroundColor: Colors.primary,
-  },
-  actions: {
-    paddingBottom: 16,
-    gap: 12,
-  },
-  primaryBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-  },
-  primaryBtnText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  skipBtn: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  skipBtnText: {
-    fontSize: 15,
-    color: Colors.textMuted,
-    fontWeight: '500',
-  },
-});
+function makeStyles(c: ColorTheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+      paddingHorizontal: 32,
+    },
+    content: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingBottom: 32,
+    },
+    iconCircle: {
+      width: 120,
+      height: 120,
+      borderRadius: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 40,
+    },
+    icon: {
+      fontSize: 56,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '800',
+      color: c.text,
+      textAlign: 'center',
+      marginBottom: 16,
+      letterSpacing: -0.5,
+    },
+    body: {
+      fontSize: 16,
+      color: c.textSecondary,
+      textAlign: 'center',
+      lineHeight: 24,
+      maxWidth: 300,
+    },
+    exampleBox: {
+      marginTop: 24,
+      backgroundColor: c.surface,
+      borderRadius: 16,
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      shadowColor: c.cardShadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    exampleText: {
+      fontSize: 15,
+      color: c.primary,
+      fontWeight: '600',
+      textAlign: 'center',
+      fontStyle: 'italic',
+    },
+    dots: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 8,
+      marginBottom: 32,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: c.border,
+    },
+    dotActive: {
+      width: 24,
+      backgroundColor: c.primary,
+    },
+    actions: {
+      paddingBottom: 16,
+      gap: 12,
+    },
+    primaryBtn: {
+      backgroundColor: c.primary,
+      borderRadius: 16,
+      paddingVertical: 18,
+      alignItems: 'center',
+    },
+    primaryBtnText: {
+      color: '#FFFFFF',
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    skipBtn: {
+      alignItems: 'center',
+      paddingVertical: 8,
+    },
+    skipBtnText: {
+      fontSize: 15,
+      color: c.textMuted,
+      fontWeight: '500',
+    },
+  });
+}
