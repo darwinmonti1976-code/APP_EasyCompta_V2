@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -45,6 +46,8 @@ const TYPE_LABELS: Record<TransactionType, string> = {
   debt:    'Dette',
   transfer:'Transfert',
 };
+
+const PAGE_SIZE = 50;
 
 function periodToDateRange(period: Period): { from: string; to: string } {
   const now = new Date();
@@ -138,6 +141,8 @@ export function HistoryScreen({ navigation }: Props) {
   const [editForm, setEditForm] = useState<{ description: string; amount: string; category: string; type: TransactionType; date: string }>({ description: '', amount: '', category: '', type: 'expense', date: '' });
   const [exporting, setExporting] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsTab, setAnalyticsTab] = useState<'cat' | 'trend'>('cat');
   const [budgetTarget, setBudgetTarget] = useState<{ cat: string; current: string } | null>(null);
@@ -151,22 +156,54 @@ export function HistoryScreen({ navigation }: Props) {
     setLoadError(false);
     try {
       const { from, to } = periodToDateRange(period);
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('workspace_id', activeWorkspace.id)
         .gte('date', from)
         .lte('date', to)
         .order('date', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(0, PAGE_SIZE - 1);
+      if (typeFilter) query = query.eq('type', typeFilter);
+      const { data, error } = await query;
       if (error) throw error;
-      if (data) setTransactions(data as Transaction[]);
+      setTransactions((data ?? []) as Transaction[]);
+      setHasMore((data?.length ?? 0) === PAGE_SIZE);
     } catch {
       setLoadError(true);
     } finally {
       setLoading(false);
     }
-  }, [activeWorkspace, period]);
+  }, [activeWorkspace, period, typeFilter]);
+
+  const loadMore = useCallback(async () => {
+    if (!activeWorkspace || !hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const { from, to } = periodToDateRange(period);
+      const offset = transactions.length;
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('workspace_id', activeWorkspace.id)
+        .gte('date', from)
+        .lte('date', to)
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+      if (typeFilter) query = query.eq('type', typeFilter);
+      const { data } = await query;
+      if (data?.length) {
+        setTransactions(prev => [...prev, ...data as Transaction[]]);
+        setHasMore(data.length === PAGE_SIZE);
+      } else {
+        setHasMore(false);
+      }
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [activeWorkspace, period, typeFilter, hasMore, loadingMore, transactions.length]);
 
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
   useEffect(() => { loadBudgets(); }, [loadBudgets]);
@@ -273,13 +310,11 @@ export function HistoryScreen({ navigation }: Props) {
     });
   }
 
-  const filtered = transactions.filter(t => {
-    const matchSearch = search.trim() === '' ||
-      t.description_clean.toLowerCase().includes(search.toLowerCase()) ||
-      t.category.toLowerCase().includes(search.toLowerCase());
-    const matchType = typeFilter === null || t.type === typeFilter;
-    return matchSearch && matchType;
-  });
+  const filtered = transactions.filter(t =>
+    search.trim() === '' ||
+    t.description_clean.toLowerCase().includes(search.toLowerCase()) ||
+    t.category.toLowerCase().includes(search.toLowerCase())
+  );
 
   const totalExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const totalIncome  = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -541,6 +576,17 @@ export function HistoryScreen({ navigation }: Props) {
           )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator
+                size="small"
+                color={Colors.primary}
+                style={{ paddingVertical: 16 }}
+              />
+            ) : null
+          }
         />
       )}
 
