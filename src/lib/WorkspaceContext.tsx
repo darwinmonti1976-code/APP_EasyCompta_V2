@@ -18,6 +18,7 @@ interface WorkspaceContextValue {
   declineInvitation: (member: WorkspaceMember) => Promise<void>;
   leaveWorkspace: (workspaceId: string) => Promise<void>;
   deleteWorkspace: (workspaceId: string) => Promise<void>;
+  removeMember: (memberId: string) => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -143,6 +144,10 @@ export function WorkspaceProvider({ userId, userEmail, children }: {
     await refreshWorkspaces();
   }
 
+  async function removeMember(memberId: string) {
+    await supabase.from('workspace_members').delete().eq('id', memberId);
+  }
+
   return (
     <WorkspaceContext.Provider value={{
       workspaces,
@@ -157,6 +162,7 @@ export function WorkspaceProvider({ userId, userEmail, children }: {
       declineInvitation,
       leaveWorkspace,
       deleteWorkspace,
+      removeMember,
     }}>
       {children}
     </WorkspaceContext.Provider>

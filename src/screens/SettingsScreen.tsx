@@ -37,7 +37,7 @@ const WS_TYPE_COLORS: Record<Workspace['type'], string> = {
 export function SettingsScreen({ navigation }: Props) {
   const { workspaces, activeWorkspace, pendingInvitations, switchWorkspace,
     createWorkspace, inviteMember, acceptInvitation, declineInvitation,
-    leaveWorkspace, deleteWorkspace, refreshWorkspaces } = useWorkspace();
+    leaveWorkspace, deleteWorkspace, removeMember, refreshWorkspaces } = useWorkspace();
 
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState('');
@@ -111,6 +111,23 @@ export function SettingsScreen({ navigation }: Props) {
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Quitter', style: 'destructive', onPress: () => leaveWorkspace(ws.id) },
+      ]
+    );
+  }
+
+  function handleRemoveMember(member: WorkspaceMember) {
+    Alert.alert(
+      'Retirer le membre',
+      `Retirer ${member.invited_email} de cet espace ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Retirer', style: 'destructive',
+          onPress: async () => {
+            await removeMember(member.id);
+            setMembers(prev => prev.filter(m => m.id !== member.id));
+          },
+        },
       ]
     );
   }
@@ -271,9 +288,15 @@ export function SettingsScreen({ navigation }: Props) {
               {members.map(m => (
                 <View key={m.id} style={styles.memberRow}>
                   <Text style={styles.memberEmail} numberOfLines={1}>{m.invited_email}</Text>
-                  <Text style={styles.memberRole}>
-                    {m.role === 'owner' ? 'Propriétaire' : 'Membre'}
-                  </Text>
+                  <Text style={styles.memberRole}>Membre</Text>
+                  {activeWorkspace?.owner_id === userId && (
+                    <TouchableOpacity
+                      style={styles.removeMemberBtn}
+                      onPress={() => handleRemoveMember(m)}
+                    >
+                      <Text style={styles.removeMemberText}>Retirer</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
             </Section>
@@ -406,10 +429,15 @@ const styles = StyleSheet.create({
   },
   deleteWsButtonText: { fontSize: 13 },
   memberRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center', gap: 8,
   },
   memberEmail: { fontSize: 14, color: Colors.text, flex: 1 },
   memberRole: { fontSize: 12, color: Colors.textMuted, fontWeight: '500' },
+  removeMemberBtn: {
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 8, borderWidth: 1, borderColor: Colors.expenseLight,
+  },
+  removeMemberText: { fontSize: 11, fontWeight: '600', color: Colors.expense },
 
   workspaceRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
