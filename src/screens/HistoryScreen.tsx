@@ -137,6 +137,7 @@ export function HistoryScreen({ navigation }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<{ description: string; amount: string; category: string; type: TransactionType; date: string }>({ description: '', amount: '', category: '', type: 'expense', date: '' });
   const [exporting, setExporting] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsTab, setAnalyticsTab] = useState<'cat' | 'trend'>('cat');
   const [budgetTarget, setBudgetTarget] = useState<{ cat: string; current: string } | null>(null);
@@ -147,9 +148,10 @@ export function HistoryScreen({ navigation }: Props) {
   const loadTransactions = useCallback(async () => {
     if (!activeWorkspace) { setLoading(false); return; }
     setLoading(true);
+    setLoadError(false);
     try {
       const { from, to } = periodToDateRange(period);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('workspace_id', activeWorkspace.id)
@@ -157,7 +159,10 @@ export function HistoryScreen({ navigation }: Props) {
         .lte('date', to)
         .order('date', { ascending: false })
         .order('created_at', { ascending: false });
+      if (error) throw error;
       if (data) setTransactions(data as Transaction[]);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -507,6 +512,14 @@ export function HistoryScreen({ navigation }: Props) {
         <View style={styles.centered}>
           <Text style={styles.loadingText}>Chargement…</Text>
         </View>
+      ) : loadError ? (
+        <View style={styles.centered}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={styles.emptyText}>Impossible de charger les transactions.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadTransactions}>
+            <Text style={styles.retryButtonText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
       ) : filtered.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>{transactions.length === 0 ? '📭' : '🔍'}</Text>
@@ -806,6 +819,11 @@ const styles = StyleSheet.create({
   loadingText: { color: Colors.textSecondary, fontSize: 15 },
   emptyIcon: { fontSize: 48 },
   emptyText: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', maxWidth: 200 },
+  retryButton: {
+    marginTop: 4, backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
+  },
+  retryButtonText: { fontSize: 14, fontWeight: '700', color: Colors.primary },
   listContent: { paddingVertical: 8, paddingBottom: 32 },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },

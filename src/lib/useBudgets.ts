@@ -1,35 +1,48 @@
 import { useState, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from './supabase';
 
 type BudgetMap = Record<string, number>; // category -> monthly amount
-
-function key(workspaceId: string) {
-  return `@budgets_${workspaceId}`;
-}
 
 export function useBudgets(workspaceId: string | undefined) {
   const [budgets, setBudgets] = useState<BudgetMap>({});
 
   const load = useCallback(async () => {
     if (!workspaceId) return;
-    const raw = await AsyncStorage.getItem(key(workspaceId));
-    if (raw) setBudgets(JSON.parse(raw));
+    const { data } = await supabase
+      .from('budgets')
+      .select('category, amount')
+      .eq('workspace_id', workspaceId);
+    if (data) {
+      const map: BudgetMap = {};
+      for (const row of data) map[row.category] = row.amount;
+      setBudgets(map);
+    }
   }, [workspaceId]);
 
   const setBudget = useCallback(async (category: string, amount: number) => {
     if (!workspaceId) return;
-    const updated = { ...budgets, [category]: amount };
-    setBudgets(updated);
-    await AsyncStorage.setItem(key(workspaceId), JSON.stringify(updated));
-  }, [workspaceId, budgets]);
+    setBudgets(prev => ({ ...prev, [category]: amount }));
+    await supabase
+      .from('budgets')
+      .upsert(
+        { workspace_id: workspaceId, category, amount },
+        { onConflict: 'workspace_id,category' }
+      );
+  }, [workspaceId]);
 
   const removeBudget = useCallback(async (category: string) => {
     if (!workspaceId) return;
-    const updated = { ...budgets };
-    delete updated[category];
-    setBudgets(updated);
-    await AsyncStorage.setItem(key(workspaceId), JSON.stringify(updated));
-  }, [workspaceId, budgets]);
+    setBudgets(prev => {
+      const next = { ...prev };
+      delete next[category];
+      return next;
+    });
+    await supabase
+      .from('budgets')
+      .delete()
+      .eq('workspace_id', workspaceId)
+      .eq('category', category);
+  }, [workspaceId]);
 
   return { budgets, load, setBudget, removeBudget };
 }

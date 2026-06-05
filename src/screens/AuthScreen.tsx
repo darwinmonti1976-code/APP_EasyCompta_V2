@@ -8,12 +8,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Animated,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Colors } from '../constants/colors';
 
-type Mode = 'login' | 'register';
+type Mode = 'login' | 'register' | 'reset';
 
 export function AuthScreen() {
   const [mode, setMode] = useState<Mode>('login');
@@ -21,6 +20,11 @@ export function AuthScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setMessage(null);
+  }
 
   async function handleAuth() {
     if (!email.trim() || !password.trim()) {
@@ -45,6 +49,25 @@ export function AuthScreen() {
         setMessage({ text: 'Compte créé ! Connecte-toi 🎉', type: 'success' });
         setMode('login');
       }
+    }
+
+    setLoading(false);
+  }
+
+  async function handleReset() {
+    if (!email.trim()) {
+      setMessage({ text: 'Entre ton adresse email 😊', type: 'error' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    if (error) {
+      setMessage({ text: 'Impossible d\'envoyer le lien. Vérifie l\'email.', type: 'error' });
+    } else {
+      setMessage({ text: 'Lien envoyé ! Consulte ta boîte mail.', type: 'success' });
     }
 
     setLoading(false);
@@ -77,74 +100,115 @@ export function AuthScreen() {
         </View>
 
         <View style={styles.card}>
-          <View style={styles.tabs}>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'login' && styles.tabActive]}
-              onPress={() => { setMode('login'); setMessage(null); }}
-            >
-              <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>
-                Connexion
+          {mode === 'reset' ? (
+            /* ── Mot de passe oublié ── */
+            <>
+              <Text style={styles.resetTitle}>Mot de passe oublié</Text>
+              <Text style={styles.resetSubtitle}>
+                Entre ton email et on t'envoie un lien pour réinitialiser ton mot de passe.
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'register' && styles.tabActive]}
-              onPress={() => { setMode('register'); setMessage(null); }}
-            >
-              <Text style={[styles.tabText, mode === 'register' && styles.tabTextActive]}>
-                Inscription
-              </Text>
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor={Colors.textMuted}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Mot de passe"
-              placeholderTextColor={Colors.textMuted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-            />
-          </View>
+              <TextInput
+                style={[styles.input, styles.resetInput]}
+                placeholder="Email"
+                placeholderTextColor={Colors.textMuted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoFocus
+              />
 
-          {message && (
-            <View
-              style={[
-                styles.messageBanner,
-                message.type === 'error' ? styles.messageBannerError : styles.messageBannerSuccess,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.messageText,
-                  message.type === 'error' ? styles.messageTextError : styles.messageTextSuccess,
-                ]}
+              {message && (
+                <View style={[styles.messageBanner, message.type === 'error' ? styles.messageBannerError : styles.messageBannerSuccess]}>
+                  <Text style={[styles.messageText, message.type === 'error' ? styles.messageTextError : styles.messageTextSuccess]}>
+                    {message.text}
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleReset}
+                disabled={loading}
               >
-                {message.text}
-              </Text>
-            </View>
-          )}
+                <Text style={styles.buttonText}>{loading ? '···' : 'Envoyer le lien'}</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleAuth}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? '···' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
-            </Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.backLink} onPress={() => switchMode('login')}>
+                <Text style={styles.backLinkText}>← Retour à la connexion</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            /* ── Login / Register ── */
+            <>
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  style={[styles.tab, mode === 'login' && styles.tabActive]}
+                  onPress={() => switchMode('login')}
+                >
+                  <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>
+                    Connexion
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, mode === 'register' && styles.tabActive]}
+                  onPress={() => switchMode('register')}
+                >
+                  <Text style={[styles.tabText, mode === 'register' && styles.tabTextActive]}>
+                    Inscription
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.form}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor={Colors.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mot de passe"
+                  placeholderTextColor={Colors.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  autoComplete="password"
+                />
+              </View>
+
+              {message && (
+                <View style={[styles.messageBanner, message.type === 'error' ? styles.messageBannerError : styles.messageBannerSuccess]}>
+                  <Text style={[styles.messageText, message.type === 'error' ? styles.messageTextError : styles.messageTextSuccess]}>
+                    {message.text}
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleAuth}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? '···' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
+                </Text>
+              </TouchableOpacity>
+
+              {mode === 'login' && (
+                <TouchableOpacity style={styles.forgotLink} onPress={() => switchMode('reset')}>
+                  <Text style={styles.forgotLinkText}>Mot de passe oublié ?</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -274,5 +338,40 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  forgotLink: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  forgotLinkText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  resetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  resetSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  resetInput: {
+    marginBottom: 16,
+  },
+  backLink: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  backLinkText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontWeight: '500',
   },
 });

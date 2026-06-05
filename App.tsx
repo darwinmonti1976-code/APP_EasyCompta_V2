@@ -1,8 +1,8 @@
 import 'react-native-gesture-handler';
 import 'react-native-url-polyfill/auto';
-import { useEffect, useState, Component, ReactNode } from 'react';
+import { useEffect, useRef, useState, Component, ReactNode } from 'react';
 import * as Notifications from 'expo-notifications';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './src/lib/supabase';
@@ -11,7 +11,7 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { MainScreen } from './src/screens/MainScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
-import { View, ActivityIndicator, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Colors } from './src/constants/colors';
 import { requestNotificationPermissions } from './src/lib/useNotifications';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -59,9 +59,17 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+function routeFromNotifData(data: Record<string, unknown>): keyof RootStackParamList | null {
+  if (data?.notifType === 'recurring_reminder') return 'Main';
+  return null;
+}
+
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const pendingRoute = useRef<keyof RootStackParamList | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -75,7 +83,30 @@ export default function App() {
 
     requestNotificationPermissions();
 
-    return () => subscription.unsubscribe();
+    // Tap sur une notif quand l'app est en foreground ou background
+    const notifSub = Notifications.addNotificationResponseReceivedListener(response => {
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      const route = routeFromNotifData(data);
+      if (!route) return;
+      if (navigationRef.isReady()) {
+        navigationRef.navigate(route);
+      } else {
+        pendingRoute.current = route;
+      }
+    });
+
+    // Tap sur une notif qui a lancé l'app depuis l'état tué — traité dans onReady()
+    Notifications.getLastNotificationResponseAsync().then(response => {
+      if (!response) return;
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      const route = routeFromNotifData(data);
+      if (route) pendingRoute.current = route;
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      notifSub.remove();
+    };
   }, []);
 
   if (loading) {
@@ -94,7 +125,15 @@ export default function App() {
             userId={session?.user.id ?? ''}
             userEmail={session?.user.email ?? ''}
           >
-            <NavigationContainer>
+            <NavigationContainer
+              ref={navigationRef}
+              onReady={() => {
+                if (pendingRoute.current) {
+                  navigationRef.navigate(pendingRoute.current);
+                  pendingRoute.current = null;
+                }
+              }}
+            >
               <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {session ? (
                   <>
