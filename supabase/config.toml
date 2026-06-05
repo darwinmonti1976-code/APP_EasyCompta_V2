@@ -1,0 +1,2 @@
+[project]
+project_id = "ton-project-ref"  # remplace par ton Project ID (Supabase Dashboard → Settings → General)

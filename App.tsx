@@ -5,12 +5,14 @@ import * as Notifications from 'expo-notifications';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Session } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './src/lib/supabase';
 import { WorkspaceProvider } from './src/lib/WorkspaceContext';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { MainScreen } from './src/screens/MainScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { OnboardingScreen, ONBOARDING_KEY } from './src/screens/OnboardingScreen';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Colors } from './src/constants/colors';
 import { requestNotificationPermissions } from './src/lib/useNotifications';
@@ -52,6 +54,7 @@ const errStyles = StyleSheet.create({
 
 export type RootStackParamList = {
   Auth: undefined;
+  Onboarding: undefined;
   Main: undefined;
   History: undefined;
   Settings: undefined;
@@ -69,11 +72,16 @@ function routeFromNotifData(data: Record<string, unknown>): keyof RootStackParam
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [onboardingDone, setOnboardingDone] = useState(false);
   const pendingRoute = useRef<keyof RootStackParamList | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        const done = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setOnboardingDone(!!done);
+      }
       setLoading(false);
     });
 
@@ -137,6 +145,13 @@ export default function App() {
               <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {session ? (
                   <>
+                    {!onboardingDone && (
+                      <Stack.Screen
+                        name="Onboarding"
+                        component={OnboardingScreen}
+                        options={{ animation: 'fade' }}
+                      />
+                    )}
                     <Stack.Screen name="Main" component={MainScreen} />
                     <Stack.Screen
                       name="History"
