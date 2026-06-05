@@ -2,8 +2,13 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Animated,
   FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,7 +21,7 @@ import { useWorkspace } from '../lib/WorkspaceContext';
 import { Colors } from '../constants/colors';
 import { MicButton } from '../components/MicButton';
 import { TransactionCard } from '../components/TransactionCard';
-import { Transaction, RecurrenceInterval } from '../lib/types';
+import { Transaction, RecurrenceInterval, TransactionType } from '../lib/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -54,15 +59,21 @@ export function MainScreen({ navigation }: Props) {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [dueRecurring, setDueRecurring] = useState<Transaction[]>([]);
   const [monthSummary, setMonthSummary] = useState<{ income: number; expense: number } | null>(null);
+  const [savedTx, setSavedTx] = useState<Transaction | null>(null);
+  const [showQuickEdit, setShowQuickEdit] = useState(false);
+  const [quickForm, setQuickForm] = useState<{
+    description: string; amount: string; category: string; type: TransactionType;
+  }>({ description: '', amount: '', category: '', type: 'expense' });
   const recurBarAnim = useRef(new Animated.Value(0)).current;
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
   const { activeWorkspace, workspaceLoadError, refreshWorkspaces } = useWorkspace();
 
-  const feedbackAnim = useRef(new Animated.Value(0)).current;
-  const photoBarAnim = useRef(new Animated.Value(0)).current;
+  const feedbackAnim    = useRef(new Animated.Value(0)).current;
+  const feedbackAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+  const photoBarAnim    = useRef(new Animated.Value(0)).current;
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const photoTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const photoTimeout    = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -176,12 +187,47 @@ export function MainScreen({ navigation }: Props) {
 
   function showFeedback(text: string, kind: FeedbackKind = 'success') {
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
+    if (feedbackAnimRef.current) feedbackAnimRef.current.stop();
     setFeedback({ text, kind });
-    Animated.sequence([
+    feedbackAnimRef.current = Animated.sequence([
       Animated.spring(feedbackAnim, { toValue: 1, useNativeDriver: true, tension: 120, friction: 8 }),
       Animated.delay(2500),
       Animated.timing(feedbackAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start(() => setFeedback(null));
+    ]);
+    feedbackAnimRef.current.start(() => setFeedback(null));
+  }
+
+  function handleOpenQuickEdit() {
+    if (!savedTx) return;
+    if (feedbackAnimRef.current) feedbackAnimRef.current.stop();
+    feedbackAnim.setValue(0);
+    setFeedback(null);
+    setQuickForm({
+      description: savedTx.description_clean,
+      amount:      savedTx.amount.toString(),
+      category:    savedTx.category,
+      type:        savedTx.type,
+    });
+    setShowQuickEdit(true);
+  }
+
+  async function handleQuickEditSave() {
+    if (!savedTx) return;
+    const amount = parseFloat(quickForm.amount);
+    if (isNaN(amount) || amount <= 0) return;
+    const updates = {
+      description_clean: quickForm.description.trim(),
+      amount,
+      category: quickForm.category.trim(),
+      type: quickForm.type,
+    };
+    await supabase.from('transactions').update(updates).eq('id', savedTx.id);
+    setTransactions(prev =>
+      prev.map(t => t.id === savedTx.id ? { ...t, ...updates } : t)
+    );
+    setSavedTx(null);
+    setShowQuickEdit(false);
+    showFeedback('✓ Transaction corrigée', 'success');
   }
 
   function showPhotoPrompt(txId: string) {
@@ -325,6 +371,7 @@ export function MainScreen({ navigation }: Props) {
 
       if (data) {
         const saved = data as Transaction;
+        setSavedTx(saved);
         setTransactions(prev => [saved, ...prev.slice(0, 9)]);
         showFeedback(`✓ ${parsed.description_clean} — ${parsed.amount} ${parsed.currency || 'CHF'}`, 'success');
         setTimeout(() => showPhotoPrompt(saved.id), 600);
@@ -417,9 +464,87 @@ export function MainScreen({ navigation }: Props) {
             { opacity: feedbackAnim, transform: [{ translateY: feedbackTranslateY }] },
           ]}
         >
-          <Text style={styles.feedbackText}>{feedback.text}</Text>
+          <Text style={styles.feedbackText} numberOfLines={1}>{feedback.text}</Text>
+          {feedback.kind === 'success' && savedTx && (
+            <TouchableOpacity onPress={handleOpenQuickEdit} style={styles.quickEditBtn}>
+              <Text style={styles.quickEditBtnText}>Modifier</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       )}
+
+      {/* Modal correction rapide */}
+      <Modal
+        visible={showQuickEdit}
+        animationType="slide"
+        transparent
+        onRequestClose={() => { setShowQuickEdit(false); setSavedTx(null); }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalCard}>
+            <View style={styles.modalHandle} />
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>Corriger la transaction</Text>
+
+              <Text style={styles.fieldLabel}>Description</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={quickForm.description}
+                onChangeText={v => setQuickForm(f => ({ ...f, description: v }))}
+                placeholderTextColor={Colors.textMuted}
+              />
+
+              <Text style={styles.fieldLabel}>Montant</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={quickForm.amount}
+                onChangeText={v => setQuickForm(f => ({ ...f, amount: v }))}
+                keyboardType="decimal-pad"
+                placeholder="0.00"
+                placeholderTextColor={Colors.textMuted}
+              />
+
+              <Text style={styles.fieldLabel}>Catégorie</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={quickForm.category}
+                onChangeText={v => setQuickForm(f => ({ ...f, category: v }))}
+                placeholderTextColor={Colors.textMuted}
+              />
+
+              <Text style={styles.fieldLabel}>Type</Text>
+              <View style={styles.typeRow}>
+                {(['expense', 'income', 'debt', 'transfer'] as TransactionType[]).map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[styles.typeChip, quickForm.type === t && styles.typeChipActive]}
+                    onPress={() => setQuickForm(f => ({ ...f, type: t }))}
+                  >
+                    <Text style={[styles.typeChipText, quickForm.type === t && styles.typeChipTextActive]}>
+                      {{ expense: 'Dépense', income: 'Revenu', debt: 'Dette', transfer: 'Transfert' }[t]}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={() => { setShowQuickEdit(false); setSavedTx(null); }}
+                >
+                  <Text style={styles.cancelBtnText}>Annuler</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveBtn} onPress={handleQuickEditSave}>
+                  <Text style={styles.saveBtnText}>Enregistrer</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       <View style={styles.micSection}>
         <MicButton
@@ -531,11 +656,43 @@ const styles = StyleSheet.create({
   feedbackBanner: {
     marginHorizontal: 24, marginVertical: 8,
     borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   feedbackSuccess: { backgroundColor: Colors.successLight },
   feedbackError: { backgroundColor: Colors.expenseLight },
   feedbackInfo: { backgroundColor: Colors.primaryLight },
-  feedbackText: { fontSize: 14, fontWeight: '600', color: Colors.text, textAlign: 'center' },
+  feedbackText: { fontSize: 14, fontWeight: '600', color: Colors.text, flex: 1 },
+  quickEditBtn: {
+    backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  quickEditBtnText: { fontSize: 12, fontWeight: '700', color: Colors.text },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
+  modalCard: {
+    backgroundColor: Colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 28, paddingBottom: 40,
+  },
+  modalHandle: {
+    width: 40, height: 4, backgroundColor: Colors.border, borderRadius: 2,
+    alignSelf: 'center', marginBottom: 20,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text, textAlign: 'center', marginBottom: 20 },
+  fieldLabel: { fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase' },
+  fieldInput: {
+    backgroundColor: Colors.surfaceAlt, borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 12,
+    fontSize: 15, color: Colors.text, marginBottom: 16,
+  },
+  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  typeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: Colors.surfaceAlt },
+  typeChipActive: { backgroundColor: Colors.primary },
+  typeChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
+  typeChipTextActive: { color: '#FFFFFF' },
+  modalActions: { flexDirection: 'row', gap: 12 },
+  cancelBtn: { flex: 1, backgroundColor: Colors.surfaceAlt, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  cancelBtnText: { fontSize: 15, fontWeight: '600', color: Colors.text },
+  saveBtn: { flex: 2, backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   micSection: { alignItems: 'center', paddingVertical: 32 },
   micHint: { marginTop: 16, fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
   listSection: { flex: 1 },
