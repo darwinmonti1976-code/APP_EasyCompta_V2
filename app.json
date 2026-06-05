@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "EasyCompta",
+    "slug": "APP_EasyCompta_V2",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F8F9FF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "EasyCompta utilise le micro pour enregistrer tes transactions vocales.",
+        "NSPhotoLibraryUsageDescription": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
+        "NSCameraUsageDescription": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "EasyCompta utilise le micro pour enregistrer tes transactions vocales."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
+          "cameraPermission": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus."
+        }
+      ]
+    ]
+  }
+}
