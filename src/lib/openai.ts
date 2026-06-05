@@ -66,6 +66,45 @@ export async function transcribeAudio(source: string | Blob): Promise<string> {
   return data.text as string;
 }
 
+export async function ocrReceipt(imageUrl: string, defaultCurrency = 'CHF'): Promise<ParsedTransaction> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: buildSystemPrompt(defaultCurrency) },
+        {
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: imageUrl, detail: 'low' } },
+            { type: 'text', text: 'Extrais les informations de transaction depuis ce reçu ou ticket de caisse.' },
+          ],
+        },
+      ],
+      temperature: 0,
+      max_tokens: 300,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`GPT Vision ${response.status}: ${body.slice(0, 120)}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices[0].message.content as string;
+
+  try {
+    return JSON.parse(content) as ParsedTransaction;
+  } catch {
+    throw new Error('Format de réponse invalide');
+  }
+}
+
 export async function parseTransaction(text: string, defaultCurrency = 'CHF'): Promise<ParsedTransaction> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

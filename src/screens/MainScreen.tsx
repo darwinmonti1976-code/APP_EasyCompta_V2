@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
+  Alert,
   Animated,
   FlatList,
   KeyboardAvoidingView,
@@ -15,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
-import { transcribeAudio, parseTransaction } from '../lib/openai';
+import { transcribeAudio, parseTransaction, ocrReceipt } from '../lib/openai';
 import { useAudioRecorder } from '../lib/useAudioRecorder';
 import { useWorkspace } from '../lib/WorkspaceContext';
 import { Colors } from '../constants/colors';
@@ -58,6 +59,7 @@ export function MainScreen({ navigation }: Props) {
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [pendingPhotoTxId, setPendingPhotoTxId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
   const [dueRecurring, setDueRecurring] = useState<Transaction[]>([]);
   const [monthSummary, setMonthSummary] = useState<{ income: number; expense: number } | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState('CHF');
@@ -340,6 +342,103 @@ export function MainScreen({ navigation }: Props) {
     }
   }
 
+  function openReceiptScanner() {
+    Alert.alert(
+      'Scanner un reçu',
+      'Choisir la source',
+      [
+        { text: '📷 Caméra', onPress: () => handleScanReceipt('camera') },
+        { text: '🖼 Galerie', onPress: () => handleScanReceipt('gallery') },
+        { text: 'Annuler', style: 'cancel' },
+      ]
+    );
+  }
+
+  async function handleScanReceipt(source: 'camera' | 'gallery') {
+    if (!activeWorkspace) return;
+
+    if (source === 'camera') {
+      const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+      if (!granted) { showFeedback('Accès caméra refusé', 'error'); return; }
+    } else {
+      const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!granted) { showFeedback('Accès photos refusé', 'error'); return; }
+    }
+
+    const result = source === 'camera'
+      ? await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.7 })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+
+    if (result.canceled) return;
+
+    setIsScanningReceipt(true);
+    try {
+      const uri = result.assets[0].uri;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('no user');
+
+      const ext = uri.split('.').pop() ?? 'jpg';
+      const path = `${user.id}/ocr_${Date.now()}.${ext}`;
+      const fetchRes = await fetch(uri);
+      const blob = await fetchRes.blob();
+
+      const { error: uploadError } = await supabase.storage
+        .from('transaction-photos')
+        .upload(path, blob, { contentType: `image/${ext}` });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('transaction-photos')
+        .getPublicUrl(path);
+
+      showFeedback('🔍 Lecture du reçu…', 'info');
+      const parsed = await ocrReceipt(publicUrl, defaultCurrency);
+
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert({
+          date: today,
+          amount: parsed.amount,
+          currency: parsed.currency || defaultCurrency,
+          type: parsed.type,
+          category: parsed.category,
+          payment_method: parsed.payment_method,
+          scope: parsed.scope,
+          workspace_id: activeWorkspace.id,
+          description_raw: null,
+          description_clean: parsed.description_clean,
+          has_attachment: true,
+          attachment_url: publicUrl,
+          created_by_email: user.email ?? '',
+          user_id: user.id,
+          is_recurring: false,
+          recurrence_interval: null,
+          next_due_date: null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const saved = data as Transaction;
+      setSavedTx(saved);
+      setTransactions(prev => [saved, ...prev.slice(0, 9)]);
+      setQuickForm({
+        description: parsed.description_clean,
+        amount: parsed.amount.toString(),
+        category: parsed.category,
+        type: parsed.type,
+      });
+      setShowQuickEdit(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showFeedback(msg.slice(0, 90), 'error');
+    } finally {
+      setIsScanningReceipt(false);
+    }
+  }
+
   async function handlePressIn() {
     const granted = await startRecording();
     if (!granted) showFeedback('Micro non autorisé', 'error');
@@ -583,6 +682,15 @@ export function MainScreen({ navigation }: Props) {
         <Text style={styles.micHint}>
           {isRecording ? "Je t'écoute…" : isProcessing ? 'Analyse en cours…' : 'Maintiens pour parler'}
         </Text>
+        <TouchableOpacity
+          style={[styles.scanBtn, (isScanningReceipt || isProcessing || isRecording) && { opacity: 0.4 }]}
+          onPress={openReceiptScanner}
+          disabled={isScanningReceipt || isProcessing || isRecording || !activeWorkspace}
+        >
+          <Text style={styles.scanBtnText}>
+            {isScanningReceipt ? '🔍 Lecture…' : '🧾 Scanner un reçu'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {transactions.length > 0 && (
@@ -722,6 +830,16 @@ const styles = StyleSheet.create({
   saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   micSection: { alignItems: 'center', paddingVertical: 32 },
   micHint: { marginTop: 16, fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
+  scanBtn: {
+    marginTop: 14,
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  scanBtnText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
   listSection: { flex: 1 },
   listTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginHorizontal: 24, marginBottom: 8 },
   listContent: { paddingBottom: 120 },
