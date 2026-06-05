@@ -19,6 +19,7 @@ interface WorkspaceContextValue {
   leaveWorkspace: (workspaceId: string) => Promise<void>;
   deleteWorkspace: (workspaceId: string) => Promise<void>;
   removeMember: (memberId: string) => Promise<void>;
+  renameWorkspace: (workspaceId: string, name: string) => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -148,6 +149,11 @@ export function WorkspaceProvider({ userId, userEmail, children }: {
     await supabase.from('workspace_members').delete().eq('id', memberId);
   }
 
+  async function renameWorkspace(workspaceId: string, name: string) {
+    await supabase.from('workspaces').update({ name }).eq('id', workspaceId);
+    await refreshWorkspaces();
+  }
+
   return (
     <WorkspaceContext.Provider value={{
       workspaces,
@@ -163,6 +169,7 @@ export function WorkspaceProvider({ userId, userEmail, children }: {
       leaveWorkspace,
       deleteWorkspace,
       removeMember,
+      renameWorkspace,
     }}>
       {children}
     </WorkspaceContext.Provider>

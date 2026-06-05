@@ -37,7 +37,8 @@ const WS_TYPE_COLORS: Record<Workspace['type'], string> = {
 export function SettingsScreen({ navigation }: Props) {
   const { workspaces, activeWorkspace, pendingInvitations, switchWorkspace,
     createWorkspace, inviteMember, acceptInvitation, declineInvitation,
-    leaveWorkspace, deleteWorkspace, removeMember, refreshWorkspaces } = useWorkspace();
+    leaveWorkspace, deleteWorkspace, removeMember, renameWorkspace,
+    refreshWorkspaces } = useWorkspace();
 
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState('');
@@ -49,6 +50,8 @@ export function SettingsScreen({ navigation }: Props) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newWsType, setNewWsType] = useState<Workspace['type']>('family');
   const [newWsName, setNewWsName] = useState('');
+  const [renamingWsId, setRenamingWsId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -113,6 +116,13 @@ export function SettingsScreen({ navigation }: Props) {
         { text: 'Quitter', style: 'destructive', onPress: () => leaveWorkspace(ws.id) },
       ]
     );
+  }
+
+  async function handleRenameConfirm(wsId: string) {
+    const name = renameValue.trim();
+    if (name) await renameWorkspace(wsId, name);
+    setRenamingWsId(null);
+    setRenameValue('');
   }
 
   function handleRemoveMember(member: WorkspaceMember) {
@@ -217,21 +227,42 @@ export function SettingsScreen({ navigation }: Props) {
                   <View style={[styles.wsTypeBadge, { backgroundColor: WS_TYPE_COLORS[ws.type] }]}>
                     <Text style={styles.wsTypeText}>{WS_TYPE_LABELS[ws.type]}</Text>
                   </View>
-                  <Text style={[styles.wsName, isActive && styles.wsNameActive]}>{ws.name}</Text>
-                  {isActive && <Text style={styles.activeCheck}>✓</Text>}
-                  {ws.owner_id === userId && workspaces.length > 1 && (
-                    <TouchableOpacity
-                      style={styles.deleteWsButton}
-                      onPress={() => handleDeleteWorkspace(ws)}
-                    >
+                  {renamingWsId === ws.id ? (
+                    <>
+                      <TextInput
+                        style={styles.renameInput}
+                        value={renameValue}
+                        onChangeText={setRenameValue}
+                        autoFocus
+                        onSubmitEditing={() => handleRenameConfirm(ws.id)}
+                        returnKeyType="done"
+                        maxLength={40}
+                      />
+                      <TouchableOpacity onPress={() => handleRenameConfirm(ws.id)}>
+                        <Text style={styles.renameConfirm}>✓</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => setRenamingWsId(null)}>
+                        <Text style={styles.renameCancel}>✕</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={[styles.wsName, isActive && styles.wsNameActive]}>{ws.name}</Text>
+                      {isActive && <Text style={styles.activeCheck}>✓</Text>}
+                      {ws.owner_id === userId && (
+                        <TouchableOpacity onPress={() => { setRenamingWsId(ws.id); setRenameValue(ws.name); }}>
+                          <Text style={styles.renameIcon}>✏</Text>
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  )}
+                  {ws.owner_id === userId && workspaces.length > 1 && renamingWsId !== ws.id && (
+                    <TouchableOpacity style={styles.deleteWsButton} onPress={() => handleDeleteWorkspace(ws)}>
                       <Text style={styles.deleteWsButtonText}>🗑</Text>
                     </TouchableOpacity>
                   )}
-                  {ws.owner_id !== userId && (
-                    <TouchableOpacity
-                      style={styles.leaveButton}
-                      onPress={() => handleLeaveWorkspace(ws)}
-                    >
+                  {ws.owner_id !== userId && renamingWsId !== ws.id && (
+                    <TouchableOpacity style={styles.leaveButton} onPress={() => handleLeaveWorkspace(ws)}>
                       <Text style={styles.leaveButtonText}>Quitter</Text>
                     </TouchableOpacity>
                   )}
@@ -433,6 +464,14 @@ const styles = StyleSheet.create({
   },
   memberEmail: { fontSize: 14, color: Colors.text, flex: 1 },
   memberRole: { fontSize: 12, color: Colors.textMuted, fontWeight: '500' },
+  renameInput: {
+    flex: 1, fontSize: 14, color: Colors.text,
+    backgroundColor: Colors.surfaceAlt, borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 4,
+  },
+  renameConfirm: { fontSize: 16, color: Colors.primary, fontWeight: '700', paddingHorizontal: 6 },
+  renameCancel: { fontSize: 14, color: Colors.textMuted, paddingHorizontal: 4 },
+  renameIcon: { fontSize: 13, color: Colors.textMuted, paddingHorizontal: 4 },
   removeMemberBtn: {
     paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 8, borderWidth: 1, borderColor: Colors.expenseLight,
