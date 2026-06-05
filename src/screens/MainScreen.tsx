@@ -95,6 +95,28 @@ export function MainScreen({ navigation }: Props) {
     }
   }, [activeWorkspace]);
 
+  // Stable ref so the Realtime callback always calls the latest loaders
+  const realtimeReloadRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    realtimeReloadRef.current = () => {
+      loadTransactions();
+      loadMonthSummary();
+    };
+  });
+
+  useEffect(() => {
+    if (!activeWorkspace || activeWorkspace.type === 'personal') return;
+    const channel = supabase
+      .channel(`main-ws-${activeWorkspace.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `workspace_id=eq.${activeWorkspace.id}` },
+        () => realtimeReloadRef.current()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [activeWorkspace?.id]);
+
   async function loadMonthSummary() {
     if (!activeWorkspace) return;
     const now = new Date();

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -208,6 +208,23 @@ export function HistoryScreen({ navigation }: Props) {
 
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
   useEffect(() => { loadBudgets(); }, [loadBudgets]);
+
+  // Stable ref so the Realtime callback always calls the latest loadTransactions
+  const loadTransactionsRef = useRef(loadTransactions);
+  useEffect(() => { loadTransactionsRef.current = loadTransactions; }, [loadTransactions]);
+
+  useEffect(() => {
+    if (!activeWorkspace || !isSharedWs) return;
+    const channel = supabase
+      .channel(`hist-ws-${activeWorkspace.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `workspace_id=eq.${activeWorkspace.id}` },
+        () => loadTransactionsRef.current()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [activeWorkspace?.id, isSharedWs]);
 
   function handleStartEdit(tx: Transaction) {
     const [y, m, d] = tx.date.split('-');
