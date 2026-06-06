@@ -13,6 +13,7 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { MainScreen } from './src/screens/MainScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { RecurringScreen } from './src/screens/RecurringScreen';
 import { OnboardingScreen, ONBOARDING_KEY } from './src/screens/OnboardingScreen';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Colors } from './src/constants/colors';
@@ -59,6 +60,7 @@ export type RootStackParamList = {
   Main: undefined;
   History: undefined;
   Settings: undefined;
+  Recurring: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -163,6 +165,11 @@ export default function App() {
                     <Stack.Screen
                       name="Settings"
                       component={SettingsScreen}
+                      options={{ animation: 'slide_from_right' }}
+                    />
+                    <Stack.Screen
+                      name="Recurring"
+                      component={RecurringScreen}
                       options={{ animation: 'slide_from_right' }}
                     />
                   </>

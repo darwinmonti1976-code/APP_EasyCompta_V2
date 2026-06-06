@@ -603,6 +603,9 @@ export function MainScreen({ navigation }: Props) {
           )}
         </View>
         <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Recurring')}>
+            <Text style={styles.iconButtonText}>↻</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('History')}>
             <Text style={styles.iconButtonText}>📋</Text>
           </TouchableOpacity>
