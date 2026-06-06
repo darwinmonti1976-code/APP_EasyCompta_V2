@@ -44,6 +44,12 @@ const WS_TYPE_ICONS: Record<string, string> = {
   business: '💼',
 };
 
+function todayDMY(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
 function nextDueDate(fromDate: string, interval: RecurrenceInterval): string {
   const d = new Date(fromDate);
   switch (interval) {
@@ -72,6 +78,12 @@ export function MainScreen({ navigation }: Props) {
   const [quickForm, setQuickForm] = useState<{
     description: string; amount: string; category: string; type: TransactionType;
   }>({ description: '', amount: '', category: '', type: 'expense' });
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualForm, setManualForm] = useState<{
+    description: string; amount: string; currency: string; category: string;
+    type: TransactionType; date: string; is_recurring: boolean;
+    recurrence_interval: RecurrenceInterval | null;
+  }>({ description: '', amount: '', currency: 'CHF', category: '', type: 'expense', date: '', is_recurring: false, recurrence_interval: null });
   const recurBarAnim = useRef(new Animated.Value(0)).current;
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
@@ -444,6 +456,59 @@ export function MainScreen({ navigation }: Props) {
     }
   }
 
+  function openManualEntry() {
+    setManualForm({
+      description: '',
+      amount: '',
+      currency: defaultCurrency,
+      category: '',
+      type: 'expense',
+      date: todayDMY(),
+      is_recurring: false,
+      recurrence_interval: null,
+    });
+    setShowManualEntry(true);
+  }
+
+  async function handleManualSave() {
+    const amount = parseFloat(manualForm.amount.replace(',', '.'));
+    if (isNaN(amount) || amount <= 0 || !manualForm.description.trim() || !manualForm.category.trim()) return;
+    const parts = manualForm.date.split('.');
+    const isoDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : new Date().toISOString().split('T')[0];
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !activeWorkspace) return;
+      const scope = activeWorkspace.type === 'family' ? 'family' : activeWorkspace.type === 'business' ? 'business' : 'personal';
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert({
+          date: isoDate, amount, currency: manualForm.currency, type: manualForm.type,
+          category: manualForm.category.trim(), payment_method: 'unknown', scope,
+          workspace_id: activeWorkspace.id, description_raw: '',
+          description_clean: manualForm.description.trim(), has_attachment: false,
+          attachment_url: null, created_by_email: user.email ?? '', user_id: user.id,
+          is_recurring: manualForm.is_recurring,
+          recurrence_interval: manualForm.is_recurring ? manualForm.recurrence_interval : null,
+          next_due_date: (manualForm.is_recurring && manualForm.recurrence_interval)
+            ? nextDueDate(isoDate, manualForm.recurrence_interval)
+            : null,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      const saved = data as Transaction;
+      setSavedTx(saved);
+      setTransactions(prev => [saved, ...prev.slice(0, 9)]);
+      setShowManualEntry(false);
+      loadMonthSummary();
+      showFeedback(`✓ ${manualForm.description.trim()} — ${amount.toFixed(2)} ${manualForm.currency}`, 'success');
+      setTimeout(() => showPhotoPrompt(saved.id), 600);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showFeedback(msg.slice(0, 90), 'error');
+    }
+  }
+
   async function handlePressIn() {
     const granted = await startRecording();
     if (!granted) showFeedback('Micro non autorisé', 'error');
@@ -677,6 +742,149 @@ export function MainScreen({ navigation }: Props) {
         </KeyboardAvoidingView>
       </Modal>
 
+      {/* Modal saisie manuelle */}
+      <Modal
+        visible={showManualEntry}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowManualEntry(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalCard}>
+            <View style={styles.modalHandle} />
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <Text style={styles.modalTitle}>Saisie manuelle</Text>
+
+              <Text style={styles.fieldLabel}>Description</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualForm.description}
+                onChangeText={v => setManualForm(f => ({ ...f, description: v }))}
+                placeholder="Ex: Loyer, Courses Migros…"
+                placeholderTextColor={colors.textMuted}
+                autoFocus
+              />
+
+              <Text style={styles.fieldLabel}>Montant</Text>
+              <View style={styles.amountRow}>
+                <TextInput
+                  style={[styles.fieldInput, { flex: 1, marginBottom: 0 }]}
+                  value={manualForm.amount}
+                  onChangeText={v => setManualForm(f => ({ ...f, amount: v }))}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  placeholderTextColor={colors.textMuted}
+                />
+                {(['CHF', 'EUR', 'USD'] as const).map(c => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[styles.currencySmallChip, manualForm.currency === c && styles.currencySmallChipActive]}
+                    onPress={() => setManualForm(f => ({ ...f, currency: c }))}
+                  >
+                    <Text style={[styles.currencySmallText, manualForm.currency === c && styles.currencySmallTextActive]}>
+                      {c}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Catégorie</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', gap: 8, paddingVertical: 2 }}>
+                  {['Courses', 'Restaurant', 'Transport', 'Logement', 'Santé', 'Loisirs', 'Shopping', 'Salaire', 'Autre'].map(cat => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[styles.catChip, manualForm.category === cat && styles.catChipActive]}
+                      onPress={() => setManualForm(f => ({ ...f, category: cat }))}
+                    >
+                      <Text style={[styles.catChipText, manualForm.category === cat && styles.catChipTextActive]}>
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualForm.category}
+                onChangeText={v => setManualForm(f => ({ ...f, category: v }))}
+                placeholder="Ou saisir une catégorie…"
+                placeholderTextColor={colors.textMuted}
+              />
+
+              <Text style={styles.fieldLabel}>Type</Text>
+              <View style={styles.typeRow}>
+                {(['expense', 'income', 'debt', 'transfer'] as TransactionType[]).map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[styles.typeChip, manualForm.type === t && styles.typeChipActive]}
+                    onPress={() => setManualForm(f => ({ ...f, type: t }))}
+                  >
+                    <Text style={[styles.typeChipText, manualForm.type === t && styles.typeChipTextActive]}>
+                      {{ expense: 'Dépense', income: 'Revenu', debt: 'Dette', transfer: 'Transfert' }[t]}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.fieldLabel}>Date</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualForm.date}
+                onChangeText={v => setManualForm(f => ({ ...f, date: v }))}
+                placeholder="JJ.MM.AAAA"
+                placeholderTextColor={colors.textMuted}
+                keyboardType="numbers-and-punctuation"
+                maxLength={10}
+              />
+
+              <TouchableOpacity
+                style={styles.toggleRow}
+                onPress={() => setManualForm(f => ({
+                  ...f,
+                  is_recurring: !f.is_recurring,
+                  recurrence_interval: !f.is_recurring ? 'monthly' : null,
+                }))}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.toggleLabel}>Transaction récurrente</Text>
+                <View style={[styles.toggle, manualForm.is_recurring && styles.toggleOn]}>
+                  <View style={[styles.toggleKnob, manualForm.is_recurring && styles.toggleKnobOn]} />
+                </View>
+              </TouchableOpacity>
+
+              {manualForm.is_recurring && (
+                <View style={[styles.typeRow, { marginBottom: 12 }]}>
+                  {(['daily', 'weekly', 'monthly', 'yearly'] as RecurrenceInterval[]).map(iv => (
+                    <TouchableOpacity
+                      key={iv}
+                      style={[styles.typeChip, manualForm.recurrence_interval === iv && styles.typeChipActive]}
+                      onPress={() => setManualForm(f => ({ ...f, recurrence_interval: iv }))}
+                    >
+                      <Text style={[styles.typeChipText, manualForm.recurrence_interval === iv && styles.typeChipTextActive]}>
+                        {{ daily: 'Quotidien', weekly: 'Hebdo', monthly: 'Mensuel', yearly: 'Annuel' }[iv]}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              <View style={[styles.modalActions, { marginTop: 8 }]}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowManualEntry(false)}>
+                  <Text style={styles.cancelBtnText}>Annuler</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveBtn} onPress={handleManualSave}>
+                  <Text style={styles.saveBtnText}>Enregistrer</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       <View style={styles.micSection}>
         <MicButton
           isRecording={isRecording}
@@ -695,6 +903,13 @@ export function MainScreen({ navigation }: Props) {
           <Text style={styles.scanBtnText}>
             {isScanningReceipt ? '🔍 Lecture…' : '🧾 Scanner un reçu'}
           </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.manualEntryBtn, (isProcessing || isRecording) && { opacity: 0.4 }]}
+          onPress={openManualEntry}
+          disabled={isProcessing || isRecording || !activeWorkspace}
+        >
+          <Text style={styles.manualEntryBtnText}>✏️ Saisie manuelle</Text>
         </TouchableOpacity>
       </View>
 
@@ -846,6 +1061,50 @@ function makeStyles(c: ColorTheme) {
       borderColor: c.border,
     },
     scanBtnText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    manualEntryBtn: {
+      marginTop: 10,
+      backgroundColor: c.surfaceAlt,
+      borderRadius: 20,
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    manualEntryBtnText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
+    amountRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+    currencySmallChip: {
+      paddingHorizontal: 10, paddingVertical: 8,
+      borderRadius: 10, backgroundColor: c.surfaceAlt,
+    },
+    currencySmallChipActive: { backgroundColor: c.primary },
+    currencySmallText: { fontSize: 13, fontWeight: '700', color: c.textSecondary },
+    currencySmallTextActive: { color: '#FFFFFF' },
+    catChip: {
+      paddingHorizontal: 12, paddingVertical: 6,
+      borderRadius: 16, backgroundColor: c.surfaceAlt,
+    },
+    catChipActive: { backgroundColor: c.primaryLight },
+    catChipText: { fontSize: 12, fontWeight: '600', color: c.textSecondary },
+    catChipTextActive: { color: c.primary },
+    toggleRow: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingVertical: 14, marginBottom: 8,
+      borderTopWidth: 1, borderTopColor: c.border,
+    },
+    toggleLabel: { fontSize: 14, fontWeight: '600', color: c.text },
+    toggle: {
+      width: 46, height: 26, borderRadius: 13,
+      backgroundColor: c.surfaceAlt, padding: 3,
+    },
+    toggleOn: { backgroundColor: c.primary },
+    toggleKnob: {
+      width: 20, height: 20, borderRadius: 10,
+      backgroundColor: c.textMuted,
+    },
+    toggleKnobOn: {
+      backgroundColor: '#FFFFFF',
+      transform: [{ translateX: 20 }],
+    },
     listSection: { flex: 1 },
     listTitle: { fontSize: 16, fontWeight: '700', color: c.text, marginHorizontal: 24, marginBottom: 8 },
     listContent: { paddingBottom: 120 },
