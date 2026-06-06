@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#F8F9FF;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:#2D3748; }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+.header { display:flex; justify-content:space-between; align-items:center;
+  padding:16px 24px 8px; }
+.greeting { font-size:22px; font-weight:800; color:#2D3748; }
+.ws-indicator { font-size:13px; color:#718096; margin-top:2px; }
+.header-actions { display:flex; gap:8px; }
+.icon-btn { width:40px; height:40px; border-radius:12px; background:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  box-shadow:0 2px 8px rgba(124,158,255,.15); }
+.summary-card { margin:0 24px 8px; background:#fff; border-radius:16px;
+  padding:14px; display:flex; box-shadow:0 2px 8px rgba(124,158,255,.1); }
+.sc-item { flex:1; text-align:center; }
+.sc-label { font-size:10px; color:#A0AEC0; font-weight:600; text-transform:uppercase; }
+.sc-val { font-size:17px; font-weight:800; margin-top:3px; }
+.sc-div { width:1px; background:#E2E8F0; margin:2px 0; }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<div class="header">
+  <div>
+    <div class="greeting">Bonjour 👋</div>
+    <div class="ws-indicator">👨‍👩‍👧 Famille Monti</div>
+  </div>
+  <div class="header-actions">
+    <div class="icon-btn">↻</div><div class="icon-btn">💰</div>
+    <div class="icon-btn">📋</div><div class="icon-btn">⚙</div>
+  </div>
+</div>
+
+<div class="summary-card">
+  <div class="sc-item"><div class="sc-label">Revenus</div><div class="sc-val" style="color:#6BCB77">+5 840</div></div>
+  <div class="sc-div"></div>
+  <div class="sc-item"><div class="sc-label">Dépenses</div><div class="sc-val" style="color:#FFB3B3">-3 210</div></div>
+  <div class="sc-div"></div>
+  <div class="sc-item"><div class="sc-label">Solde</div><div class="sc-val" style="color:#6BCB77">+2 630</div></div>
+</div>
+
+<!-- Mic section — recording state -->
+<div style="display:flex;flex-direction:column;align-items:center;padding:40px 0 24px">
+  <!-- Outer pulse ring 1 -->
+  <div style="position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center">
+    <div style="position:absolute;width:180px;height:180px;border-radius:90px;
+      background:rgba(255,158,174,.15)"></div>
+    <div style="position:absolute;width:145px;height:145px;border-radius:72px;
+      background:rgba(255,158,174,.25)"></div>
+    <!-- Mic button — recording (pink) -->
+    <div style="width:110px;height:110px;border-radius:55px;background:#FF9EAE;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 28px rgba(255,158,174,.5);position:relative;z-index:1">
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div style="width:18px;height:26px;border-radius:9px;border:3px solid #fff;margin-bottom:2px"></div>
+        <div style="width:2px;height:8px;background:#fff"></div>
+        <div style="width:18px;height:2px;border-radius:1px;background:#fff;margin-top:-1px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;font-size:17px;color:#2D3748;font-weight:700">Je t'écoute…</div>
+  <div style="margin-top:8px;font-size:13px;color:#A0AEC0">Relâche quand tu as fini</div>
+
+  <!-- Waveform simulation -->
+  <div style="display:flex;align-items:center;gap:4px;margin-top:28px">
+    <div style="width:4px;height:20px;background:#FF9EAE;border-radius:2px;opacity:.7"></div>
+    <div style="width:4px;height:36px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:52px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:28px;background:#FF9EAE;border-radius:2px;opacity:.8"></div>
+    <div style="width:4px;height:44px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:60px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:36px;background:#FF9EAE;border-radius:2px;opacity:.8"></div>
+    <div style="width:4px;height:48px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:32px;background:#FF9EAE;border-radius:2px;opacity:.6"></div>
+    <div style="width:4px;height:56px;background:#FF9EAE;border-radius:2px"></div>
+    <div style="width:4px;height:40px;background:#FF9EAE;border-radius:2px;opacity:.7"></div>
+    <div style="width:4px;height:24px;background:#FF9EAE;border-radius:2px;opacity:.5"></div>
+  </div>
+
+  <!-- Transcript bubble -->
+  <div style="margin-top:32px;background:#fff;border-radius:20px;
+    padding:18px 24px;margin-left:32px;margin-right:32px;width:calc(100% - 64px);
+    box-shadow:0 2px 12px rgba(124,158,255,.15)">
+    <div style="font-size:15px;color:#7C9EFF;font-weight:600;font-style:italic;text-align:center">
+      "J'ai payé 45 francs au supermarché Coop…"
+    </div>
+  </div>
+</div>
+
+<!-- Recent transactions dimmed -->
+<div style="margin:0 24px;font-size:16px;font-weight:700;color:#2D3748;opacity:.3">Dernières transactions</div>
+<div style="margin:8px 16px;background:#fff;border-radius:16px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;opacity:.3">
+  <div style="width:40px;height:40px;border-radius:12px;background:#FFF0F0;
+    display:flex;align-items:center;justify-content:center;font-size:18px">🛒</div>
+  <div style="flex:1">
+    <div style="font-size:14px;font-weight:600;color:#2D3748">Courses Migros</div>
+    <div style="font-size:12px;color:#A0AEC0;margin-top:2px">Courses · 05.06.2026</div>
+  </div>
+  <div style="font-size:15px;font-weight:700;color:#FFB3B3">-186.40 CHF</div>
+</div>
+
+<div style="height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px">
+  <div style="width:134px;height:5px;background:#2D3748;border-radius:3px;opacity:.2"></div>
+</div>
+</body></html>

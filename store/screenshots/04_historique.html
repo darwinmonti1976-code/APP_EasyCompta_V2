@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#F8F9FF;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:#2D3748; }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+.bar-track { height:8px; border-radius:4px; background:#F0F4FF; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<!-- Header -->
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
+  <div style="width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,.06)">←</div>
+  <div style="font-size:18px;font-weight:700;color:#2D3748">Historique</div>
+  <div style="display:flex;gap:6px">
+    <div style="width:36px;height:36px;border-radius:10px;background:#E8EDFF;display:flex;align-items:center;justify-content:center;font-size:15px">📊</div>
+    <div style="background:#F0F4FF;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;color:#718096">↓ PDF</div>
+    <div style="background:#F0F4FF;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;color:#718096">↓ CSV</div>
+  </div>
+</div>
+
+<!-- Period filter -->
+<div style="display:flex;gap:8px;padding:0 16px 10px;overflow:hidden">
+  <div style="padding:7px 14px;border-radius:12px;background:#F0F4FF;font-size:13px;font-weight:600;color:#718096">Ce mois</div>
+  <div style="padding:7px 14px;border-radius:12px;background:#F0F4FF;font-size:13px;font-weight:600;color:#718096">3 mois</div>
+  <div style="padding:7px 14px;border-radius:12px;background:#7C9EFF;font-size:13px;font-weight:700;color:#fff">Cette année</div>
+  <div style="padding:7px 14px;border-radius:12px;background:#F0F4FF;font-size:13px;font-weight:600;color:#718096">Tout</div>
+</div>
+
+<!-- Summary bar -->
+<div style="display:flex;margin:0 16px 10px;background:#fff;border-radius:14px;padding:12px 16px;gap:0;box-shadow:0 1px 6px rgba(124,158,255,.1)">
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:#A0AEC0;font-weight:600;text-transform:uppercase">Dépenses</div><div style="font-size:15px;font-weight:800;color:#FFB3B3">-3 210</div></div>
+  <div style="width:1px;background:#E2E8F0"></div>
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:#A0AEC0;font-weight:600;text-transform:uppercase">Revenus</div><div style="font-size:15px;font-weight:800;color:#6BCB77">+5 840</div></div>
+  <div style="width:1px;background:#E2E8F0"></div>
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:#A0AEC0;font-weight:600;text-transform:uppercase">Solde</div><div style="font-size:15px;font-weight:800;color:#2D3748">+2 630</div></div>
+</div>
+
+<!-- Analytics panel (open, categories tab) -->
+<div style="margin:0 16px 10px;background:#fff;border-radius:18px;padding:16px;box-shadow:0 2px 10px rgba(124,158,255,.1)">
+  <!-- Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <div style="flex:1;text-align:center;padding:8px;border-radius:10px;background:#E8EDFF;font-size:13px;font-weight:700;color:#7C9EFF">Catégories</div>
+    <div style="flex:1;text-align:center;padding:8px;border-radius:10px;background:#F0F4FF;font-size:13px;font-weight:600;color:#718096">Tendance</div>
+  </div>
+  <div style="font-size:11px;color:#A0AEC0;margin-bottom:12px">Appuie longuement sur une catégorie pour définir un budget</div>
+
+  <!-- Category bars -->
+  <div style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:#2D3748;width:90px">Logement</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#7C9EFF"></div></div>
+        <div style="font-size:10px;color:#A0AEC0;margin-top:2px">1 500 / 1 500 CHF</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748;width:40px;text-align:right">1500</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:#2D3748;width:90px">Courses</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:85%;background:#F6AD55"></div></div>
+        <div style="font-size:10px;color:#A0AEC0;margin-top:2px">850 / 1 000 CHF</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748;width:40px;text-align:right">850</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:#2D3748;width:90px">Transport</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:49%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748;width:40px;text-align:right">490</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:#2D3748;width:90px">Restaurant</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:27%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748;width:40px;text-align:right">270</div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <div style="font-size:13px;font-weight:600;color:#2D3748;width:90px">Loisirs</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748;width:40px;text-align:right">100</div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction list -->
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 6px rgba(124,158,255,.08)">
+  <div style="width:40px;height:40px;border-radius:12px;background:#FFF0F0;display:flex;align-items:center;justify-content:center;font-size:18px">🛒</div>
+  <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#2D3748">Courses Migros</div><div style="font-size:12px;color:#A0AEC0;margin-top:2px">Courses · 05.06.2026 · Sophie Monti</div></div>
+  <div style="font-size:15px;font-weight:700;color:#FFB3B3">-186.40</div>
+</div>
+
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 6px rgba(124,158,255,.08)">
+  <div style="width:40px;height:40px;border-radius:12px;background:#FFF0F0;display:flex;align-items:center;justify-content:center;font-size:18px">🍽</div>
+  <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#2D3748">Restaurant La Bonne Table</div><div style="font-size:12px;color:#A0AEC0;margin-top:2px">Restaurant · 04.06.2026 · Darwin Monti</div></div>
+  <div style="font-size:15px;font-weight:700;color:#FFB3B3">-78</div>
+</div>
+
+<div style="height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;position:absolute;bottom:0;left:0;right:0">
+  <div style="width:134px;height:5px;background:#2D3748;border-radius:3px;opacity:.2"></div>
+</div>
+</body></html>
