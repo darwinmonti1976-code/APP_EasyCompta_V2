@@ -46,3 +46,7 @@ screenshot_*.png
 # generated native folders
 /ios
 /android
+store/screenshots/node_modules/
+store/screenshots/package.json
+store/screenshots/package-lock.json
+store/screenshots/capture.js
