@@ -132,12 +132,18 @@ function MicIcon({ isRecording, isProcessing, styles }: { isRecording: boolean; 
   );
 }
 
+const micSvgStyles = StyleSheet.create({
+  body:  { width: 18, height: 26, borderRadius: 9, borderWidth: 3, marginBottom: 2 },
+  stand: { width: 2, height: 8 },
+  base:  { width: 18, height: 2, borderRadius: 1, marginTop: -1 },
+});
+
 function MicSVG({ color, size }: { color: string; size: number }) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <View style={[styles.micBody, { borderColor: color }]} />
-      <View style={[styles.micStand, { backgroundColor: color }]} />
-      <View style={[styles.micBase, { backgroundColor: color }]} />
+      <View style={[micSvgStyles.body, { borderColor: color }]} />
+      <View style={[micSvgStyles.stand, { backgroundColor: color }]} />
+      <View style={[micSvgStyles.base, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -172,23 +178,6 @@ function makeStyles(c: ColorTheme) {
       color: '#FFFFFF',
       fontSize: 28,
       fontWeight: '700',
-    },
-    micBody: {
-      width: 18,
-      height: 26,
-      borderRadius: 9,
-      borderWidth: 3,
-      marginBottom: 2,
-    },
-    micStand: {
-      width: 2,
-      height: 8,
-    },
-    micBase: {
-      width: 18,
-      height: 2,
-      borderRadius: 1,
-      marginTop: -1,
     },
   });
 }
