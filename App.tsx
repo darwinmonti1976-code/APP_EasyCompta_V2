@@ -87,6 +87,9 @@ export default function App() {
       if (session) {
         const done = await AsyncStorage.getItem(ONBOARDING_KEY);
         setOnboardingDone(!!done);
+        // Only request for existing users who already finished onboarding.
+        // New users get the permission dialog via the onboarding slide.
+        if (done) requestNotificationPermissions();
       }
       setLoading(false);
     });
@@ -94,8 +97,6 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
     });
-
-    requestNotificationPermissions();
 
     // Tap sur une notif quand l'app est en foreground ou background
     const notifSub = Notifications.addNotificationResponseReceivedListener(response => {

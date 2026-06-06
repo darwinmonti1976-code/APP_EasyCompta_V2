@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../lib/ThemeContext';
 import { ColorTheme } from '../constants/colors';
+import { requestNotificationPermissions } from '../lib/useNotifications';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
@@ -44,6 +45,13 @@ export function OnboardingScreen({ navigation }: Props) {
       body: 'Crée des espaces famille ou pro pour suivre les finances ensemble.',
       example: 'Invitations par email, transactions partagées en temps réel.',
     },
+    {
+      icon: '🔔',
+      color: colors.primaryLight,
+      title: 'Reste informé',
+      body: 'Reçois des rappels pour tes transactions récurrentes et des alertes quand tu approches d\'un budget.',
+      example: null,
+    },
   ];
   const [current, setCurrent] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -58,7 +66,10 @@ export function OnboardingScreen({ navigation }: Props) {
     setTimeout(() => setCurrent(nextIndex), 120);
   }
 
-  async function finish() {
+  async function finish(requestPerms = false) {
+    if (requestPerms) {
+      await requestNotificationPermissions().catch(() => {});
+    }
     await AsyncStorage.setItem(ONBOARDING_KEY, '1');
     navigation.replace('Main');
   }
@@ -95,16 +106,20 @@ export function OnboardingScreen({ navigation }: Props) {
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.primaryBtn}
-          onPress={isLast ? finish : () => transition(current + 1)}
+          onPress={isLast ? () => finish(true) : () => transition(current + 1)}
           activeOpacity={0.85}
         >
           <Text style={styles.primaryBtnText}>
-            {isLast ? 'Commencer 🚀' : 'Suivant'}
+            {isLast ? '🔔 Activer les notifications' : 'Suivant'}
           </Text>
         </TouchableOpacity>
 
-        {!isLast && (
-          <TouchableOpacity style={styles.skipBtn} onPress={finish}>
+        {isLast ? (
+          <TouchableOpacity style={styles.skipBtn} onPress={() => finish(false)}>
+            <Text style={styles.skipBtnText}>Pas maintenant</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.skipBtn} onPress={() => finish(false)}>
             <Text style={styles.skipBtnText}>Passer</Text>
           </TouchableOpacity>
         )}
