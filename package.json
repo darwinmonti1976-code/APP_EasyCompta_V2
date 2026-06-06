@@ -26,7 +26,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.21.0",
-    "react-native-worklets-core": "^1.6.3"
+    "react-native-worklets-core": "^1.6.3",
+    "widget-bridge": "file:./modules/widget-bridge"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

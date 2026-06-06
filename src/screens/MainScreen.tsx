@@ -29,6 +29,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { scheduleRecurringReminders } from '../lib/useNotifications';
+import { updateWidget } from '../lib/widgetBridge';
 
 interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
@@ -135,6 +136,7 @@ export function MainScreen({ navigation }: Props) {
     const income  = data.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const expense = data.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     setMonthSummary({ income, expense });
+    updateWidget(income, expense, defaultCurrency);
   }
 
   async function scheduleAllRecurringNotifications() {
