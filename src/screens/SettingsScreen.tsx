@@ -56,6 +56,7 @@ export function SettingsScreen({ navigation }: Props) {
   const [renamingWsId, setRenamingWsId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [defaultCurrency, setDefaultCurrency] = useState('CHF');
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const CURRENCIES = ['CHF', 'EUR', 'USD'] as const;
 
@@ -172,6 +173,39 @@ export function SettingsScreen({ navigation }: Props) {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Supprimer mon compte',
+      'Cette action est irréversible.\n\nToutes tes données seront définitivement supprimées : transactions, espaces de travail, budgets et photos de reçus.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer définitivement',
+          style: 'destructive',
+          onPress: confirmDeleteAccount,
+        },
+      ]
+    );
+  }
+
+  async function confirmDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', {
+        method: 'POST',
+      });
+      if (error) throw error;
+      await supabase.auth.signOut();
+    } catch {
+      Alert.alert(
+        'Erreur',
+        'Impossible de supprimer le compte pour le moment. Réessaie plus tard ou contacte darwin.monti1976@gmail.com.',
+      );
+    } finally {
+      setDeletingAccount(false);
+    }
   }
 
   return (
@@ -447,6 +481,17 @@ export function SettingsScreen({ navigation }: Props) {
           <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>
+
+          {/* Delete account */}
+          <TouchableOpacity
+            style={[styles.deleteAccountButton, deletingAccount && { opacity: 0.5 }]}
+            onPress={handleDeleteAccount}
+            disabled={deletingAccount}
+          >
+            <Text style={styles.deleteAccountText}>
+              {deletingAccount ? 'Suppression…' : 'Supprimer mon compte'}
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -616,5 +661,9 @@ function makeStyles(c: ColorTheme) {
       borderWidth: 1, borderColor: c.expenseLight,
     },
     logoutText: { fontSize: 16, fontWeight: '700', color: '#D64545' },
+    deleteAccountButton: {
+      borderRadius: 16, paddingVertical: 14, alignItems: 'center',
+    },
+    deleteAccountText: { fontSize: 13, fontWeight: '600', color: c.textMuted },
   });
 }
