@@ -34,6 +34,9 @@ yarn-error.*
 .env*.local
 .env
 
+# Google Play service account key (NEVER commit this)
+google-service-account.json
+
 # screenshots
 screenshot_*.png
 
