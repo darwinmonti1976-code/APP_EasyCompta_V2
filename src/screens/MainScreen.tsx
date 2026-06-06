@@ -29,6 +29,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { scheduleRecurringReminders } from '../lib/useNotifications';
+import { checkBudgetAlert } from '../lib/budgetAlerts';
 import { updateWidget } from '../lib/widgetBridge';
 
 interface Props {
@@ -448,6 +449,9 @@ export function MainScreen({ navigation }: Props) {
         type: parsed.type,
       });
       setShowQuickEdit(true);
+      if (parsed.type === 'expense') {
+        checkBudgetAlert(activeWorkspace.id, parsed.category, parsed.amount).catch(() => {});
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       showFeedback(msg.slice(0, 90), 'error');
@@ -503,6 +507,9 @@ export function MainScreen({ navigation }: Props) {
       loadMonthSummary();
       showFeedback(`✓ ${manualForm.description.trim()} — ${amount.toFixed(2)} ${manualForm.currency}`, 'success');
       setTimeout(() => showPhotoPrompt(saved.id), 600);
+      if (manualForm.type === 'expense') {
+        checkBudgetAlert(activeWorkspace.id, manualForm.category.trim(), amount).catch(() => {});
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       showFeedback(msg.slice(0, 90), 'error');
@@ -571,6 +578,9 @@ export function MainScreen({ navigation }: Props) {
         setTransactions(prev => [saved, ...prev.slice(0, 9)]);
         showFeedback(`✓ ${parsed.description_clean} — ${parsed.amount} ${parsed.currency || 'CHF'}`, 'success');
         setTimeout(() => showPhotoPrompt(saved.id), 600);
+        if (parsed.type === 'expense') {
+          checkBudgetAlert(activeWorkspace.id, parsed.category, parsed.amount).catch(() => {});
+        }
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

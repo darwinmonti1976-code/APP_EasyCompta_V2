@@ -71,6 +71,7 @@ const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 function routeFromNotifData(data: Record<string, unknown>): keyof RootStackParamList | null {
   if (data?.notifType === 'recurring_reminder') return 'Main';
+  if (data?.notifType === 'budget_exceeded' || data?.notifType === 'budget_warning') return 'Budget';
   return null;
 }
 
