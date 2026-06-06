@@ -15,7 +15,6 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.darwinmonti.easycompta",
       "buildNumber": "1",
-      "appStoreUrl": "",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "EasyCompta utilise le micro pour enregistrer tes transactions vocales.",
         "NSPhotoLibraryUsageDescription": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
@@ -40,6 +39,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "privacyPolicyUrl": "https://darwinmonti1976-code.github.io/APP_EasyCompta_V2/"
     },
     "plugins": [
       "expo-secure-store",
