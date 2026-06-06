@@ -14,14 +14,18 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.darwinmonti.easycompta",
+      "buildNumber": "1",
+      "appStoreUrl": "",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "EasyCompta utilise le micro pour enregistrer tes transactions vocales.",
         "NSPhotoLibraryUsageDescription": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
-        "NSCameraUsageDescription": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus."
+        "NSCameraUsageDescription": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus.",
+        "NSUserNotificationsUsageDescription": "EasyCompta envoie des rappels pour tes transactions récurrentes."
       }
     },
     "android": {
       "package": "com.darwinmonti.easycompta",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
