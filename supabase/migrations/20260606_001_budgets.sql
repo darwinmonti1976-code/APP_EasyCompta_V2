@@ -28,6 +28,33 @@ create trigger budgets_updated_at
   for each row execute function public.set_updated_at();
 
 -- ─────────────────────────────────────────────────────────────
+-- Helper : vérifie qu'un utilisateur est propriétaire ou membre
+--          accepté d'un workspace
+-- ─────────────────────────────────────────────────────────────
+
+create or replace function public.is_workspace_member(
+  p_workspace_id uuid,
+  p_user_id      uuid
+)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    -- Propriétaire du workspace
+    select 1 from public.workspaces
+    where id = p_workspace_id and owner_id = p_user_id
+    union all
+    -- Membre accepté
+    select 1 from public.workspace_members
+    where workspace_id = p_workspace_id
+      and user_id = p_user_id
+      and status = 'accepted'
+  );
+$$;
+
+-- ─────────────────────────────────────────────────────────────
 -- RLS
 -- ─────────────────────────────────────────────────────────────
 

@@ -21,9 +21,9 @@ begin
   -- N'envoie l'email que pour les nouvelles invitations en attente
   if new.status = 'pending' and new.invited_email is not null then
     perform net.http_post(
-      url     := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/invite-member',
+      url     := 'https://uhmkozvmvbgumhxtcfoq.supabase.co/functions/v1/invite-member',
       headers := jsonb_build_object(
-        'Authorization', 'Bearer YOUR_SERVICE_KEY',
+        'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVobWtvenZtdmJndW1oeHRjZm9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTgwMDk3OCwiZXhwIjoyMDk1Mzc2OTc4fQ.OQbInQpmHxxWXnySp16Pyu_8ars_7BVFWnRjFhbb-Dg',
         'Content-Type',  'application/json'
       ),
       body    := jsonb_build_object('record', row_to_json(new))
