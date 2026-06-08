@@ -31,6 +31,7 @@ import { RootStackParamList } from '../../App';
 import { scheduleRecurringReminders } from '../lib/useNotifications';
 import { checkBudgetAlert } from '../lib/budgetAlerts';
 import { updateWidget } from '../lib/widgetBridge';
+import { maybeRequestReview } from '../lib/storeReview';
 
 interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
@@ -83,8 +84,8 @@ export function MainScreen({ navigation }: Props) {
   const [manualForm, setManualForm] = useState<{
     description: string; amount: string; currency: string; category: string;
     type: TransactionType; date: string; is_recurring: boolean;
-    recurrence_interval: RecurrenceInterval | null;
-  }>({ description: '', amount: '', currency: 'CHF', category: '', type: 'expense', date: '', is_recurring: false, recurrence_interval: null });
+    recurrence_interval: RecurrenceInterval | null; payment_method: 'cash' | 'card' | 'transfer' | 'unknown';
+  }>({ description: '', amount: '', currency: 'CHF', category: '', type: 'expense', date: '', is_recurring: false, recurrence_interval: null, payment_method: 'unknown' });
   const recurBarAnim = useRef(new Animated.Value(0)).current;
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
@@ -449,6 +450,7 @@ export function MainScreen({ navigation }: Props) {
         type: parsed.type,
       });
       setShowQuickEdit(true);
+      maybeRequestReview().catch(() => {});
       if (parsed.type === 'expense') {
         checkBudgetAlert(activeWorkspace.id, parsed.category, parsed.amount).catch(() => {});
       }
@@ -470,6 +472,7 @@ export function MainScreen({ navigation }: Props) {
       date: todayDMY(),
       is_recurring: false,
       recurrence_interval: null,
+      payment_method: 'unknown',
     });
     setShowManualEntry(true);
   }
@@ -487,7 +490,7 @@ export function MainScreen({ navigation }: Props) {
         .from('transactions')
         .insert({
           date: isoDate, amount, currency: manualForm.currency, type: manualForm.type,
-          category: manualForm.category.trim(), payment_method: 'unknown', scope,
+          category: manualForm.category.trim(), payment_method: manualForm.payment_method, scope,
           workspace_id: activeWorkspace.id, description_raw: '',
           description_clean: manualForm.description.trim(), has_attachment: false,
           attachment_url: null, created_by_email: user.email ?? '', user_id: user.id,
@@ -507,6 +510,7 @@ export function MainScreen({ navigation }: Props) {
       loadMonthSummary();
       showFeedback(`✓ ${manualForm.description.trim()} — ${amount.toFixed(2)} ${manualForm.currency}`, 'success');
       setTimeout(() => showPhotoPrompt(saved.id), 600);
+      maybeRequestReview().catch(() => {});
       if (manualForm.type === 'expense') {
         checkBudgetAlert(activeWorkspace.id, manualForm.category.trim(), amount).catch(() => {});
       }
@@ -578,6 +582,7 @@ export function MainScreen({ navigation }: Props) {
         setTransactions(prev => [saved, ...prev.slice(0, 9)]);
         showFeedback(`✓ ${parsed.description_clean} — ${parsed.amount} ${parsed.currency || 'CHF'}`, 'success');
         setTimeout(() => showPhotoPrompt(saved.id), 600);
+        maybeRequestReview().catch(() => {});
         if (parsed.type === 'expense') {
           checkBudgetAlert(activeWorkspace.id, parsed.category, parsed.amount).catch(() => {});
         }
@@ -841,6 +846,25 @@ export function MainScreen({ navigation }: Props) {
                   >
                     <Text style={[styles.typeChipText, manualForm.type === t && styles.typeChipTextActive]}>
                       {{ expense: 'Dépense', income: 'Revenu', debt: 'Dette', transfer: 'Transfert' }[t]}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.fieldLabel}>Paiement</Text>
+              <View style={[styles.typeRow, { marginBottom: 16 }]}>
+                {([
+                  { key: 'card',     label: '💳 Carte' },
+                  { key: 'cash',     label: '💵 Espèces' },
+                  { key: 'transfer', label: '🏦 Virement' },
+                ] as { key: 'cash' | 'card' | 'transfer'; label: string }[]).map(({ key, label }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[styles.typeChip, manualForm.payment_method === key && styles.typeChipActive]}
+                    onPress={() => setManualForm(f => ({ ...f, payment_method: key }))}
+                  >
+                    <Text style={[styles.typeChipText, manualForm.payment_method === key && styles.typeChipTextActive]}>
+                      {label}
                     </Text>
                   </TouchableOpacity>
                 ))}

@@ -139,6 +139,7 @@ export function HistoryScreen({ navigation }: Props) {
   const [period, setPeriod] = useState<Period>('all');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TransactionType | null>(null);
+  const [catFilter, setCatFilter] = useState<string | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<{ description: string; amount: string; category: string; type: TransactionType; date: string }>({ description: '', amount: '', category: '', type: 'expense', date: '' });
@@ -209,7 +210,7 @@ export function HistoryScreen({ navigation }: Props) {
     }
   }, [activeWorkspace, period, typeFilter, hasMore, loadingMore, transactions.length]);
 
-  useEffect(() => { loadTransactions(); }, [loadTransactions]);
+  useEffect(() => { loadTransactions(); setCatFilter(null); }, [loadTransactions]);
   useEffect(() => { loadBudgets(); }, [loadBudgets]);
 
   // Stable ref so the Realtime callback always calls the latest loadTransactions
@@ -331,11 +332,16 @@ export function HistoryScreen({ navigation }: Props) {
     });
   }
 
-  const filtered = transactions.filter(t =>
-    search.trim() === '' ||
-    t.description_clean.toLowerCase().includes(search.toLowerCase()) ||
-    t.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const allCategories = Array.from(new Set(transactions.map(t => t.category))).sort();
+
+  const filtered = transactions.filter(t => {
+    if (catFilter && t.category !== catFilter) return false;
+    if (search.trim() === '') return true;
+    return (
+      t.description_clean.toLowerCase().includes(search.toLowerCase()) ||
+      t.category.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   const totalExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const totalIncome  = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -456,6 +462,36 @@ export function HistoryScreen({ navigation }: Props) {
           );
         })}
       </ScrollView>
+
+      {/* Category filter chips */}
+      {allCategories.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.typeFilterScroll}
+          contentContainerStyle={styles.typeFilterRow}
+        >
+          <TouchableOpacity
+            style={[styles.typeChip, { backgroundColor: catFilter === null ? colors.primary : '#E8EAF0' }]}
+            onPress={() => setCatFilter(null)}
+          >
+            <Text style={[styles.typeChipText, { color: catFilter === null ? '#FFFFFF' : '#4A5568', fontWeight: catFilter === null ? '800' : '600' }]}>
+              Toutes
+            </Text>
+          </TouchableOpacity>
+          {allCategories.map(cat => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.typeChip, { backgroundColor: catFilter === cat ? colors.primaryLight : '#E8EAF0' }]}
+              onPress={() => setCatFilter(prev => prev === cat ? null : cat)}
+            >
+              <Text style={[styles.typeChipText, { color: catFilter === cat ? colors.primary : '#4A5568', fontWeight: catFilter === cat ? '800' : '600' }]}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
 
       {/* Summary bar */}
       {filtered.length > 0 && (
