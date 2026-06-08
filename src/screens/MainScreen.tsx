@@ -32,6 +32,7 @@ import { scheduleRecurringReminders } from '../lib/useNotifications';
 import { checkBudgetAlert } from '../lib/budgetAlerts';
 import { updateWidget } from '../lib/widgetBridge';
 import { maybeRequestReview } from '../lib/storeReview';
+import { useCategories } from '../lib/useCategories';
 
 interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
@@ -90,6 +91,7 @@ export function MainScreen({ navigation }: Props) {
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
   const { activeWorkspace, workspaceLoadError, refreshWorkspaces } = useWorkspace();
+  const { categories } = useCategories(activeWorkspace?.id);
 
   const feedbackAnim    = useRef(new Animated.Value(0)).current;
   const feedbackAnimRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -815,7 +817,7 @@ export function MainScreen({ navigation }: Props) {
               <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Catégorie</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
                 <View style={{ flexDirection: 'row', gap: 8, paddingVertical: 2 }}>
-                  {['Courses', 'Restaurant', 'Transport', 'Logement', 'Santé', 'Loisirs', 'Shopping', 'Salaire', 'Autre'].map(cat => (
+                  {categories.map(cat => (
                     <TouchableOpacity
                       key={cat}
                       style={[styles.catChip, manualForm.category === cat && styles.catChipActive]}

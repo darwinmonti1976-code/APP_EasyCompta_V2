@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../lib/WorkspaceContext';
+import { useCategories, DEFAULT_CATEGORIES } from '../lib/useCategories';
 import { useTheme } from '../lib/ThemeContext';
 import { ColorTheme } from '../constants/colors';
 import { Workspace, WorkspaceMember } from '../lib/types';
@@ -42,7 +43,9 @@ export function SettingsScreen({ navigation }: Props) {
     createWorkspace, inviteMember, acceptInvitation, declineInvitation,
     leaveWorkspace, deleteWorkspace, removeMember, renameWorkspace,
     refreshWorkspaces } = useWorkspace();
+  const { custom: customCats, addCategory, removeCategory } = useCategories(activeWorkspace?.id);
 
+  const [newCatInput, setNewCatInput] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState('');
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
@@ -79,6 +82,24 @@ export function SettingsScreen({ navigation }: Props) {
   async function handleCurrencyChange(currency: string) {
     setDefaultCurrency(currency);
     await AsyncStorage.setItem('@default_currency', currency);
+  }
+
+  async function handleAddCat() {
+    const t = newCatInput.trim();
+    if (!t) return;
+    await addCategory(t);
+    setNewCatInput('');
+  }
+
+  function handleRemoveCat(name: string) {
+    Alert.alert(
+      'Supprimer la catégorie',
+      `Supprimer "${name}" de tes catégories personnalisées ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => removeCategory(name) },
+      ]
+    );
   }
 
   useEffect(() => {
@@ -460,6 +481,45 @@ export function SettingsScreen({ navigation }: Props) {
             </View>
           </Section>
 
+          {/* Catégories personnalisées */}
+          <Section title="Catégories">
+            <Text style={styles.catHint}>
+              Les catégories par défaut ({DEFAULT_CATEGORIES.join(', ')}) sont toujours disponibles.
+            </Text>
+            {customCats.length > 0 && (
+              <View style={styles.catList}>
+                {customCats.map(cat => (
+                  <View key={cat} style={styles.catItem}>
+                    <Text style={styles.catItemText}>{cat}</Text>
+                    <TouchableOpacity onPress={() => handleRemoveCat(cat)} style={styles.catDeleteBtn}>
+                      <Text style={styles.catDeleteText}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+            <View style={styles.inviteRow}>
+              <TextInput
+                style={styles.inviteInput}
+                placeholder="Nouvelle catégorie…"
+                placeholderTextColor={colors.textMuted}
+                value={newCatInput}
+                onChangeText={setNewCatInput}
+                onSubmitEditing={handleAddCat}
+                returnKeyType="done"
+                autoCapitalize="words"
+                maxLength={30}
+              />
+              <TouchableOpacity
+                style={[styles.sendButton, !newCatInput.trim() && { opacity: 0.4 }]}
+                onPress={handleAddCat}
+                disabled={!newCatInput.trim()}
+              >
+                <Text style={styles.sendButtonText}>Ajouter</Text>
+              </TouchableOpacity>
+            </View>
+          </Section>
+
           {/* Thème */}
           <Section title="Thème">
             <View style={styles.currencyRow}>
@@ -645,6 +705,17 @@ function makeStyles(c: ColorTheme) {
     },
     sendButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
     inviteMsgText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
+
+    catHint: { fontSize: 12, color: c.textMuted, lineHeight: 17 },
+    catList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    catItem: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      backgroundColor: c.primaryLight, borderRadius: 10,
+      paddingHorizontal: 10, paddingVertical: 6,
+    },
+    catItemText: { fontSize: 13, fontWeight: '600', color: c.primary },
+    catDeleteBtn: { padding: 2 },
+    catDeleteText: { fontSize: 12, color: c.primary, fontWeight: '700' },
 
     currencyHint: { fontSize: 13, color: c.textMuted, lineHeight: 18, marginBottom: 12 },
     currencyRow: { flexDirection: 'row', gap: 10 },

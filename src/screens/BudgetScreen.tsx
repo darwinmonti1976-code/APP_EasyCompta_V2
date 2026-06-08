@@ -20,19 +20,19 @@ import { useWorkspace } from '../lib/WorkspaceContext';
 import { useTheme } from '../lib/ThemeContext';
 import { ColorTheme } from '../constants/colors';
 import { useBudgets } from '../lib/useBudgets';
+import { useCategories } from '../lib/useCategories';
 import { RootStackParamList } from '../../App';
 
 interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Budget'>;
 }
 
-const QUICK_CATS = ['Courses', 'Restaurant', 'Transport', 'Logement', 'Santé', 'Loisirs', 'Shopping', 'Abonnements', 'Autre'];
-
 export function BudgetScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const { activeWorkspace } = useWorkspace();
   const { budgets, load: loadBudgets, setBudget, removeBudget } = useBudgets(activeWorkspace?.id);
+  const { categories } = useCategories(activeWorkspace?.id);
 
   const [spending, setSpending] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -288,7 +288,7 @@ export function BudgetScreen({ navigation }: Props) {
             <Text style={styles.fieldLabel}>Catégorie</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
               <View style={{ flexDirection: 'row', gap: 8, paddingVertical: 2 }}>
-                {QUICK_CATS.filter(c => !(c in budgets)).map(cat => (
+                {categories.filter(c => !(c in budgets)).map(cat => (
                   <TouchableOpacity
                     key={cat}
                     style={[styles.catChip, newCat === cat && styles.catChipActive]}
