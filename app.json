@@ -2,6 +2,7 @@
   "expo": {
     "name": "EasyCompta",
     "slug": "easycompta",
+    "owner": "darwin.montano",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,7 +25,7 @@
     },
     "android": {
       "package": "com.darwinmonti.easycompta",
-      "versionCode": 1,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -33,7 +34,8 @@
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.READ_MEDIA_IMAGES"
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -41,7 +43,10 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "privacyPolicyUrl": "https://darwinmonti1976-code.github.io/APP_EasyCompta_V2/"
+      "privacyPolicyUrl": "https://darwinmonti1976-code.github.io/APP_EasyCompta_V2/",
+      "eas": {
+        "projectId": "d03e6911-a522-4ff9-9ddf-9a26957543b3"
+      }
     },
     "plugins": [
       "expo-secure-store",

@@ -20,9 +20,7 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "darwin.monti1976@gmail.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "appleId": "darwin.monti1976@gmail.com"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
