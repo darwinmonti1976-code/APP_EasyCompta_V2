@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#141828;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:rgba(255,255,255,.9); }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+.bar-track { height:8px; border-radius:4px; background:rgba(255,255,255,.1); overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<!-- Header -->
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
+  <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,.8)">←</div>
+  <div style="font-size:18px;font-weight:700;color:rgba(255,255,255,.9)">Historique</div>
+  <div style="display:flex;gap:6px">
+    <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,158,255,.2);display:flex;align-items:center;justify-content:center;font-size:15px">📊</div>
+    <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">↓ PDF</div>
+    <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">↓ CSV</div>
+  </div>
+</div>
+
+<!-- Period filter -->
+<div style="display:flex;gap:8px;padding:0 16px 10px;overflow:hidden">
+  <div style="padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px;font-weight:600;color:rgba(255,255,255,.5)">Ce mois</div>
+  <div style="padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px;font-weight:600;color:rgba(255,255,255,.5)">3 mois</div>
+  <div style="padding:7px 14px;border-radius:12px;background:#7C9EFF;font-size:13px;font-weight:700;color:#fff">Cette année</div>
+  <div style="padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px;font-weight:600;color:rgba(255,255,255,.5)">Tout</div>
+</div>
+
+<!-- Summary bar -->
+<div style="display:flex;margin:0 16px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 16px;gap:0">
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase">Dépenses</div><div style="font-size:15px;font-weight:800;color:#FFB3B3">-3 210</div></div>
+  <div style="width:1px;background:rgba(255,255,255,.12)"></div>
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase">Revenus</div><div style="font-size:15px;font-weight:800;color:#6BCB77">+5 840</div></div>
+  <div style="width:1px;background:rgba(255,255,255,.12)"></div>
+  <div style="flex:1;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase">Solde</div><div style="font-size:15px;font-weight:800;color:#7C9EFF">+2 630</div></div>
+</div>
+
+<!-- Analytics panel -->
+<div style="margin:0 16px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px">
+  <!-- Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <div style="flex:1;text-align:center;padding:8px;border-radius:10px;background:rgba(124,158,255,.25);font-size:13px;font-weight:700;color:#7C9EFF">Catégories</div>
+    <div style="flex:1;text-align:center;padding:8px;border-radius:10px;background:rgba(255,255,255,.06);font-size:13px;font-weight:600;color:rgba(255,255,255,.4)">Tendance</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:12px">Appuie longuement sur une catégorie pour définir un budget</div>
+
+  <!-- Category bars -->
+  <div style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.8);width:90px">Logement</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#7C9EFF"></div></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">1 500 / 1 500 CHF</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);width:40px;text-align:right">1500</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.8);width:90px">Courses</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:85%;background:#F6AD55"></div></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">850 / 1 000 CHF</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);width:40px;text-align:right">850</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.8);width:90px">Transport</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:49%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);width:40px;text-align:right">490</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.8);width:90px">Restaurant</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:27%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);width:40px;text-align:right">270</div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.8);width:90px">Loisirs</div>
+      <div style="flex:1;margin:0 10px">
+        <div class="bar-track"><div class="bar-fill" style="width:10%;background:#7C9EFF"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);width:40px;text-align:right">100</div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction list -->
+<div style="margin:0 16px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+  <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,100,100,.15);display:flex;align-items:center;justify-content:center;font-size:18px">🛒</div>
+  <div style="flex:1"><div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9)">Courses Migros</div><div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:2px">Courses · 05.06.2026 · Sophie Monti</div></div>
+  <div style="font-size:15px;font-weight:700;color:#FFB3B3">-186.40</div>
+</div>
+
+<div style="margin:0 16px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+  <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,100,100,.15);display:flex;align-items:center;justify-content:center;font-size:18px">🍽</div>
+  <div style="flex:1"><div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9)">Restaurant La Bonne Table</div><div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:2px">Restaurant · 04.06.2026 · Darwin Monti</div></div>
+  <div style="font-size:15px;font-weight:700;color:#FFB3B3">-78</div>
+</div>
+
+<div style="height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;position:absolute;bottom:0;left:0;right:0">
+  <div style="width:134px;height:5px;background:#fff;border-radius:3px;opacity:.25"></div>
+</div>
+</body></html>

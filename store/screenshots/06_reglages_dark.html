@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#141828;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:rgba(255,255,255,.9); }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+.chip { border-radius:10px; padding:7px 14px; font-size:13px; font-weight:600; }
+.chip-active { background:#7C9EFF; color:#fff; }
+.chip-inactive { background:rgba(255,255,255,.08); color:rgba(255,255,255,.5);
+  border:1px solid rgba(255,255,255,.1); }
+.section-label { font-size:13px; font-weight:700; color:rgba(255,255,255,.3);
+  text-transform:uppercase; letter-spacing:.5px; margin:0 20px 8px; }
+.card-row { margin:0 16px 6px; background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09); border-radius:16px;
+  padding:14px 16px; display:flex; align-items:center; gap:12px; }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<!-- Header -->
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px">
+  <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,.8)">←</div>
+  <div style="font-size:18px;font-weight:700;color:rgba(255,255,255,.9)">Réglages</div>
+  <div style="width:40px"></div>
+</div>
+
+<!-- User identity -->
+<div style="margin:0 16px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+  <div style="width:48px;height:48px;border-radius:24px;background:linear-gradient(135deg,#7C9EFF,#5B7FE8);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">D</div>
+  <div style="flex:1">
+    <div style="font-size:16px;font-weight:700;color:rgba(255,255,255,.9)">Darwin Monti</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:2px">darwin.monti1976@gmail.com</div>
+  </div>
+</div>
+
+<!-- Workspaces -->
+<div class="section-label">Espaces de travail</div>
+
+<div class="card-row">
+  <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,158,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px">👨‍👩‍👧</div>
+  <div style="flex:1">
+    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9)">Famille Monti</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:1px">3 membres · Propriétaire</div>
+  </div>
+  <div style="width:8px;height:8px;border-radius:4px;background:#6BCB77;margin-right:4px"></div>
+  <div style="font-size:18px;color:rgba(255,255,255,.3)">›</div>
+</div>
+
+<div class="card-row">
+  <div style="width:38px;height:38px;border-radius:10px;background:rgba(107,203,119,.15);display:flex;align-items:center;justify-content:center;font-size:18px">💼</div>
+  <div style="flex:1">
+    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9)">Perso Darwin</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:1px">1 membre · Propriétaire</div>
+  </div>
+  <div style="font-size:18px;color:rgba(255,255,255,.3)">›</div>
+</div>
+
+<div style="margin:0 16px 14px;background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.12);border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px">
+  <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,158,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px;color:#7C9EFF">+</div>
+  <div style="font-size:14px;font-weight:600;color:#7C9EFF">Nouvel espace</div>
+</div>
+
+<!-- Currency -->
+<div class="section-label">Devise</div>
+<div style="margin:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap">
+  <div class="chip chip-active">CHF</div>
+  <div class="chip chip-inactive">EUR</div>
+  <div class="chip chip-inactive">USD</div>
+  <div class="chip chip-inactive">GBP</div>
+  <div class="chip chip-inactive">CAD</div>
+  <div class="chip chip-inactive">JPY</div>
+</div>
+
+<!-- Theme -->
+<div class="section-label">Thème</div>
+<div style="margin:0 16px 18px;display:flex;gap:8px">
+  <div class="chip chip-inactive" style="display:flex;align-items:center;gap:6px"><span>☀️</span><span>Clair</span></div>
+  <div class="chip chip-active" style="display:flex;align-items:center;gap:6px"><span>🌙</span><span>Sombre</span></div>
+  <div class="chip chip-inactive" style="display:flex;align-items:center;gap:6px"><span>⚙</span><span>Système</span></div>
+</div>
+
+<!-- Notifications -->
+<div style="margin:0 16px 18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:22px">🔔</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9)">Notifications</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:1px">Alertes budgets &amp; rappels récurrents</div>
+    </div>
+  </div>
+  <div style="width:50px;height:28px;border-radius:14px;background:#7C9EFF;position:relative;box-shadow:0 2px 8px rgba(124,158,255,.4)">
+    <div style="width:22px;height:22px;border-radius:11px;background:#fff;position:absolute;top:3px;right:3px;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+  </div>
+</div>
+
+<!-- Logout -->
+<div style="margin:0 16px 8px;background:rgba(255,100,100,.08);border:1px solid rgba(255,100,100,.15);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:center;gap:8px">
+  <div style="font-size:16px">🚪</div>
+  <div style="font-size:14px;font-weight:700;color:#FFB3B3">Se déconnecter</div>
+</div>
+
+<!-- Delete account -->
+<div style="margin:0 16px;padding:12px 16px;display:flex;align-items:center;justify-content:center">
+  <div style="font-size:12px;color:rgba(255,255,255,.2);font-weight:600">Supprimer mon compte</div>
+</div>
+
+<!-- App version -->
+<div style="text-align:center;padding:6px 0">
+  <div style="font-size:11px;color:rgba(255,255,255,.2)">EasyCompta v1.0.0 · Expo SDK 54</div>
+</div>
+
+<div style="position:absolute;bottom:0;left:0;right:0;height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px">
+  <div style="width:134px;height:5px;background:#fff;border-radius:3px;opacity:.25"></div>
+</div>
+</body></html>
