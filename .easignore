@@ -1,4 +1,14 @@
 .expo/
+.claude/
 node_modules/
 .git/
 store/screenshots/node_modules/
+docs
+assets
+expo-plugins
+expo-plugins
+modules
+store
+supabase
+_claude_backup
+.github

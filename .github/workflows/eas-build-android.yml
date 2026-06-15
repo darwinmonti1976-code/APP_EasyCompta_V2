@@ -9,12 +9,12 @@ on:
       profile:
         description: 'EAS build profile'
         required: true
-        default: 'production'
+        default: 'development'
         type: choice
         options:
-          - production
-          - preview
           - development
+          - preview
+          - production
 
 jobs:
   build:
