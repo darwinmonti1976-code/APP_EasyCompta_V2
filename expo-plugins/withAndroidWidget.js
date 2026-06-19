@@ -1,15 +1,11 @@
-const { withAndroidManifest, withDangerousMod } = require('@expo/config-plugins');
 const path = require('path');
 const fs   = require('fs');
 
 const MODULE_SRC = path.join(__dirname, '..', 'modules', 'widget-bridge', 'android', 'src', 'main');
 const PROVIDER   = 'expo.modules.widgetbridge.EasyComptaWidgetProvider';
 
-/**
- * 1. Registers EasyComptaWidgetProvider in AndroidManifest.xml
- * 2. Copies layout / xml / drawable resources into the app's res folder
- */
 module.exports = function withAndroidWidget(config) {
+  const { withAndroidManifest, withDangerousMod } = require('@expo/config-plugins');
   // ── AndroidManifest ──────────────────────────────────────────────────────
   config = withAndroidManifest(config, (cfg) => {
     const app = cfg.modResults.manifest.application[0];

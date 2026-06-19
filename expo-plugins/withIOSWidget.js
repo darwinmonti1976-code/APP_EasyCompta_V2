@@ -1,4 +1,3 @@
-const { withXcodeProject, withEntitlementsPlist, withDangerousMod, IOSConfig } = require('@expo/config-plugins');
 const path = require('path');
 const fs   = require('fs');
 
@@ -7,17 +6,9 @@ const WIDGET_TARGET = 'EasyComptaWidget';
 const BUNDLE_ID     = 'com.darwinmonti.easycompta.widget';
 const MODULE_IOS    = path.join(__dirname, '..', 'modules', 'widget-bridge', 'ios', 'EasyComptaWidget');
 
-/**
- * 1. Adds App Group entitlement to the main app target
- * 2. Copies Swift widget extension files into the iOS project
- * 3. Adds the widget extension target to the Xcode project
- *
- * NOTE: After running `eas build` for the first time, open the generated
- * Xcode project and verify:
- *   - Both targets share the App Group "group.com.darwinmonti.easycompta"
- *   - The widget target has WidgetKit.framework linked
- */
 module.exports = function withIOSWidget(config) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { withXcodeProject, withEntitlementsPlist, withDangerousMod } = require('@expo/config-plugins');
   // ── Entitlements: App Group on the main app ────────────────────────────
   config = withEntitlementsPlist(config, (cfg) => {
     const groups = cfg.modResults['com.apple.security.application-groups'] ?? [];
