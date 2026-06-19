@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.darwinmonti.easycompta",
-      "versionCode": 3,
+      "versionCode": 22,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -70,9 +70,7 @@
           "color": "#7C9EFF",
           "sounds": []
         }
-      ],
-      "./expo-plugins/withAndroidWidget",
-      "./expo-plugins/withIOSWidget"
+      ]
     ]
   }
 }
