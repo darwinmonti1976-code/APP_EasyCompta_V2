@@ -11,15 +11,12 @@
       }
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "simulator": false
-      }
-    },
-    "production": {
-      "autoIncrement": true
-    }
-  },
+  "developmentClient": true,
+  "distribution": "internal",
+  "ios": {
+    "simulator": false
+  }
+},
   "submit": {
     "production": {
       "ios": {
