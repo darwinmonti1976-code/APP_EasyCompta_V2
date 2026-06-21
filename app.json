@@ -1,0 +1,77 @@
+{
+  "expo": {
+    "name": "EasyCompta",
+    "slug": "easycompta",
+    "owner": "darwin.montano",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F9FF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.darwinmonti.easycompta",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "EasyCompta utilise le micro pour enregistrer tes transactions vocales.",
+        "NSPhotoLibraryUsageDescription": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
+        "NSCameraUsageDescription": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus.",
+        "NSUserNotificationsUsageDescription": "EasyCompta envoie des rappels pour tes transactions récurrentes.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.darwinmonti.easycompta",
+      "versionCode": 22,
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "privacyPolicyUrl": "https://darwinmonti1976-code.github.io/APP_EasyCompta_V2/",
+      "eas": {
+        "projectId": "d03e6911-a522-4ff9-9ddf-9a26957543b3"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "EasyCompta utilise le micro pour enregistrer tes transactions vocales."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
+          "cameraPermission": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7C9EFF",
+          "sounds": []
+        }
+      ]
+    ]
+  }
+}

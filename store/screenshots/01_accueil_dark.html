@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#141828;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:rgba(255,255,255,.9); }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+
+.header { display:flex; justify-content:space-between; align-items:center;
+  padding:16px 24px 8px; }
+.greeting { font-size:22px; font-weight:800; color:rgba(255,255,255,.9); }
+.ws-indicator { font-size:13px; color:rgba(255,255,255,.45); margin-top:2px; }
+.header-actions { display:flex; gap:8px; }
+.icon-btn { width:40px; height:40px; border-radius:12px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
+  display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+.summary-card { margin:0 24px 8px; background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1); border-radius:16px;
+  padding:14px; display:flex; gap:0; }
+.sc-item { flex:1; text-align:center; }
+.sc-label { font-size:10px; color:rgba(255,255,255,.35); font-weight:600;
+  text-transform:uppercase; letter-spacing:.5px; }
+.sc-val { font-size:17px; font-weight:800; margin-top:3px; }
+.sc-div { width:1px; background:rgba(255,255,255,.12); margin:2px 0; }
+
+.mic-section { display:flex; flex-direction:column; align-items:center; padding:28px 0 24px; }
+.pulse-wrap { position:relative; width:160px; height:160px;
+  display:flex; align-items:center; justify-content:center; }
+.pulse { position:absolute; width:110px; height:110px; border-radius:55px;
+  background:rgba(124,158,255,.18); }
+.mic-btn { width:110px; height:110px; border-radius:55px;
+  background:linear-gradient(135deg,#7C9EFF,#5B7FE8);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 28px rgba(124,158,255,.4); }
+.mic-body { width:18px; height:26px; border-radius:9px; border:3px solid #fff; margin-bottom:2px; }
+.mic-stand { width:2px; height:8px; background:#fff; }
+.mic-base { width:18px; height:2px; border-radius:1px; background:#fff; margin-top:-1px; }
+.mic-hint { margin-top:16px; font-size:14px; color:rgba(255,255,255,.45); font-weight:500; }
+
+.scan-btn { margin-top:14px; background:rgba(124,158,255,.15); border-radius:20px;
+  padding:9px 18px; border:1px solid rgba(124,158,255,.25); font-size:13px;
+  font-weight:600; color:rgba(255,255,255,.6); }
+.manual-btn { margin-top:10px; background:rgba(255,255,255,.06); border-radius:20px;
+  padding:9px 18px; border:1px solid rgba(255,255,255,.1); font-size:13px;
+  font-weight:600; color:rgba(255,255,255,.45); }
+
+.list-title { font-size:16px; font-weight:700; color:rgba(255,255,255,.9);
+  margin:0 24px 8px; }
+.tx-card { margin:0 16px 8px; background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09); border-radius:16px;
+  padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.tx-cat-badge { width:40px; height:40px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:18px; }
+.tx-info { flex:1; }
+.tx-desc { font-size:14px; font-weight:600; color:rgba(255,255,255,.9); }
+.tx-meta { font-size:12px; color:rgba(255,255,255,.35); margin-top:2px; }
+.tx-amount { font-size:15px; font-weight:700; }
+.tx-rec { font-size:10px; color:rgba(255,255,255,.35); }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<div class="header">
+  <div>
+    <div class="greeting">Bonjour 👋</div>
+    <div class="ws-indicator">👨‍👩‍👧 Famille Monti</div>
+  </div>
+  <div class="header-actions">
+    <div class="icon-btn">↻</div>
+    <div class="icon-btn">💰</div>
+    <div class="icon-btn">📋</div>
+    <div class="icon-btn">⚙</div>
+  </div>
+</div>
+
+<div class="summary-card">
+  <div class="sc-item">
+    <div class="sc-label">Revenus</div>
+    <div class="sc-val" style="color:#6BCB77">+5 840</div>
+  </div>
+  <div class="sc-div"></div>
+  <div class="sc-item">
+    <div class="sc-label">Dépenses</div>
+    <div class="sc-val" style="color:#FFB3B3">-3 210</div>
+  </div>
+  <div class="sc-div"></div>
+  <div class="sc-item">
+    <div class="sc-label">Solde</div>
+    <div class="sc-val" style="color:#7C9EFF">+2 630</div>
+  </div>
+</div>
+
+<div class="mic-section">
+  <div class="pulse-wrap">
+    <div class="pulse"></div>
+    <div class="mic-btn">
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="mic-body"></div>
+        <div class="mic-stand"></div>
+        <div class="mic-base"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mic-hint">Maintiens pour parler</div>
+  <div class="scan-btn">🧾 Scanner un reçu</div>
+  <div class="manual-btn">✏️ Saisie manuelle</div>
+</div>
+
+<div class="list-title">Dernières transactions</div>
+
+<div class="tx-card">
+  <div class="tx-cat-badge" style="background:rgba(255,100,100,.15)">🛒</div>
+  <div class="tx-info">
+    <div class="tx-desc">Courses Migros</div>
+    <div class="tx-meta">Courses · 05.06.2026 · darwin.monti1976@gmail.com</div>
+  </div>
+  <div style="text-align:right">
+    <div class="tx-amount" style="color:#FFB3B3">-186.40 CHF</div>
+  </div>
+</div>
+
+<div class="tx-card">
+  <div class="tx-cat-badge" style="background:rgba(107,203,119,.15)">💼</div>
+  <div class="tx-info">
+    <div class="tx-desc">Salaire juin</div>
+    <div class="tx-meta">Salaire · 01.06.2026 · darwin.monti1976@gmail.com</div>
+  </div>
+  <div style="text-align:right">
+    <div class="tx-amount" style="color:#6BCB77">+5 840 CHF</div>
+    <div class="tx-rec">↻ Mensuel</div>
+  </div>
+</div>
+
+<div class="tx-card">
+  <div class="tx-cat-badge" style="background:rgba(255,100,100,.15)">🍽</div>
+  <div class="tx-info">
+    <div class="tx-desc">Restaurant La Bonne Table</div>
+    <div class="tx-meta">Restaurant · 04.06.2026</div>
+  </div>
+  <div style="text-align:right">
+    <div class="tx-amount" style="color:#FFB3B3">-78 CHF</div>
+  </div>
+</div>
+
+<div style="height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px">
+  <div style="width:134px;height:5px;background:#fff;border-radius:3px;opacity:.25"></div>
+</div>
+</body></html>

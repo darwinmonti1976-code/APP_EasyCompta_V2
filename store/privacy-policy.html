@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Politique de confidentialité — EasyCompta</title>
+  <style>
+    body { font-family: -apple-system, Arial, sans-serif; max-width: 720px; margin: 40px auto;
+           padding: 0 24px; color: #2D3748; line-height: 1.7; }
+    h1   { font-size: 28px; color: #7C9EFF; margin-bottom: 4px; }
+    h2   { font-size: 18px; margin-top: 36px; color: #2D3748; }
+    p, li { font-size: 15px; color: #4A5568; }
+    a    { color: #7C9EFF; }
+    .date { font-size: 13px; color: #A0AEC0; margin-bottom: 32px; }
+    ul   { padding-left: 20px; }
+  </style>
+</head>
+<body>
+
+<h1>Politique de confidentialité</h1>
+<p class="date">Dernière mise à jour : 6 juin 2026</p>
+
+<p>EasyCompta (« l'Application », « nous ») prend la protection de vos données personnelles très au sérieux. Cette politique explique quelles données nous collectons, pourquoi, et comment nous les utilisons.</p>
+
+<h2>1. Données collectées</h2>
+<ul>
+  <li><strong>Compte</strong> : adresse email utilisée pour l'inscription et l'authentification.</li>
+  <li><strong>Données financières</strong> : transactions (montant, catégorie, type, date, description) que vous saisissez vocalement, manuellement ou via scan de reçu.</li>
+  <li><strong>Enregistrements vocaux</strong> : vos enregistrements audio sont envoyés à OpenAI (Whisper) pour transcription, puis immédiatement supprimés. Nous ne conservons pas l'audio.</li>
+  <li><strong>Photos de reçus</strong> : les photos que vous prenez sont stockées dans Supabase Storage et associées à vos transactions. Elles sont également envoyées à OpenAI (GPT-4o Vision) pour extraction des données, puis l'image d'origine est retournée.</li>
+  <li><strong>Données d'utilisation</strong> : aucune donnée de tracking publicitaire n'est collectée.</li>
+</ul>
+
+<h2>2. Comment nous utilisons vos données</h2>
+<ul>
+  <li>Fournir et améliorer les fonctionnalités de l'Application.</li>
+  <li>Synchroniser vos transactions dans les espaces de travail partagés (famille, pro).</li>
+  <li>Envoyer des notifications de rappel pour les transactions récurrentes (avec votre accord).</li>
+  <li>Envoyer des emails d'invitation lors du partage d'un espace de travail.</li>
+</ul>
+
+<h2>3. Partage des données</h2>
+<p>Nous ne vendons pas vos données. Vos données sont partagées uniquement avec :</p>
+<ul>
+  <li><strong>Supabase</strong> (hébergement base de données et fichiers) — <a href="https://supabase.com/privacy">politique de confidentialité</a></li>
+  <li><strong>OpenAI</strong> (transcription vocale et analyse de reçus) — <a href="https://openai.com/privacy">politique de confidentialité</a>. Les données sont traitées conformément aux conditions d'utilisation de l'API OpenAI et ne sont pas utilisées pour entraîner leurs modèles.</li>
+  <li><strong>Resend</strong> (envoi d'emails d'invitation) — <a href="https://resend.com/privacy">politique de confidentialité</a></li>
+</ul>
+
+<h2>4. Conservation des données</h2>
+<p>Vos données sont conservées tant que votre compte est actif. En cas de suppression de votre compte, toutes vos données personnelles sont supprimées dans un délai de 30 jours.</p>
+
+<h2>5. Vos droits (RGPD)</h2>
+<p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants :</p>
+<ul>
+  <li><strong>Accès</strong> : obtenir une copie de vos données.</li>
+  <li><strong>Rectification</strong> : corriger des données inexactes.</li>
+  <li><strong>Suppression</strong> : demander la suppression de votre compte et de vos données.</li>
+  <li><strong>Portabilité</strong> : exporter vos transactions en CSV depuis l'Application.</li>
+  <li><strong>Opposition</strong> : vous opposer à certains traitements.</li>
+</ul>
+<p>Pour exercer ces droits, contactez-nous à : <a href="mailto:darwin.monti1976@gmail.com">darwin.monti1976@gmail.com</a></p>
+
+<h2>6. Sécurité</h2>
+<p>Vos données sont chiffrées en transit (HTTPS/TLS) et au repos. L'authentification est sécurisée par Supabase Auth. Chaque espace de travail est protégé par des politiques de sécurité au niveau des lignes (Row Level Security).</p>
+
+<h2>7. Mineurs</h2>
+<p>L'Application n'est pas destinée aux personnes de moins de 16 ans. Nous ne collectons pas sciemment de données personnelles sur des mineurs.</p>
+
+<h2>8. Modifications</h2>
+<p>Nous pouvons mettre à jour cette politique de confidentialité. Toute modification substantielle sera notifiée dans l'Application. La date de dernière mise à jour figure en haut de ce document.</p>
+
+<h2>9. Contact</h2>
+<p>Pour toute question relative à la confidentialité de vos données :<br>
+<a href="mailto:darwin.monti1976@gmail.com">darwin.monti1976@gmail.com</a></p>
+
+</body>
+</html>

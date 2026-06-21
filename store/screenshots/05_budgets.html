@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:430px; height:932px; overflow:hidden; background:#F8F9FF;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Arial,sans-serif; }
+.status { display:flex; justify-content:space-between; align-items:center;
+  padding:14px 28px 0; font-size:15px; font-weight:600; color:#2D3748; }
+.status-right { display:flex; align-items:center; gap:6px; font-size:13px; }
+.bar-track { height:10px; border-radius:5px; background:#F0F4FF; overflow:hidden; }
+.bar-fill { height:100%; border-radius:5px; }
+</style>
+</head><body>
+
+<div class="status">
+  <span>9:41</span>
+  <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+</div>
+
+<!-- Header -->
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px">
+  <div style="width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,.06)">←</div>
+  <div style="font-size:18px;font-weight:700;color:#2D3748">Budgets</div>
+  <div style="width:40px;height:40px;border-radius:12px;background:#7C9EFF;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(124,158,255,.4)">+</div>
+</div>
+
+<!-- Global summary card -->
+<div style="margin:0 16px 14px;background:linear-gradient(135deg,#7C9EFF,#5B7FE8);border-radius:20px;padding:20px;box-shadow:0 6px 20px rgba(124,158,255,.3)">
+  <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Budget total ce mois</div>
+  <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:14px">
+    <div style="font-size:30px;font-weight:800;color:#fff">3 210</div>
+    <div style="font-size:16px;color:rgba(255,255,255,.7)">/ 4 000 CHF</div>
+  </div>
+  <!-- Global bar -->
+  <div style="height:12px;background:rgba(255,255,255,.25);border-radius:6px;overflow:hidden;margin-bottom:8px">
+    <div style="height:100%;width:80.25%;background:#fff;border-radius:6px"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between">
+    <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600">80% utilisé</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600">790 CHF restant</div>
+  </div>
+</div>
+
+<!-- Section: Avec budget -->
+<div style="font-size:13px;font-weight:700;color:#A0AEC0;text-transform:uppercase;letter-spacing:.5px;margin:0 20px 8px">Avec budget</div>
+
+<!-- Logement -->
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:34px;height:34px;border-radius:10px;background:#E8EDFF;display:flex;align-items:center;justify-content:center;font-size:16px">🏠</div>
+      <div style="font-size:15px;font-weight:700;color:#2D3748">Logement</div>
+    </div>
+    <div style="font-size:13px;color:#A0AEC0">1 500 / 1 500</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" style="width:100%;background:#FFB3B3"></div></div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <div style="font-size:11px;color:#FFB3B3;font-weight:600">Budget atteint !</div>
+    <div style="font-size:11px;color:#A0AEC0">0 CHF restant</div>
+  </div>
+</div>
+
+<!-- Courses -->
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:34px;height:34px;border-radius:10px;background:#FFF5E8;display:flex;align-items:center;justify-content:center;font-size:16px">🛒</div>
+      <div style="font-size:15px;font-weight:700;color:#2D3748">Courses</div>
+    </div>
+    <div style="font-size:13px;color:#A0AEC0">850 / 1 000</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" style="width:85%;background:#F6AD55"></div></div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <div style="font-size:11px;color:#F6AD55;font-weight:600">⚠ 85% utilisé</div>
+    <div style="font-size:11px;color:#A0AEC0">150 CHF restant</div>
+  </div>
+</div>
+
+<!-- Transport -->
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:34px;height:34px;border-radius:10px;background:#E8EDFF;display:flex;align-items:center;justify-content:center;font-size:16px">🚌</div>
+      <div style="font-size:15px;font-weight:700;color:#2D3748">Transport</div>
+    </div>
+    <div style="font-size:13px;color:#A0AEC0">490 / 600</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" style="width:81.7%;background:#7C9EFF"></div></div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <div style="font-size:11px;color:#7C9EFF;font-weight:600">82% utilisé</div>
+    <div style="font-size:11px;color:#A0AEC0">110 CHF restant</div>
+  </div>
+</div>
+
+<!-- Restaurant -->
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:34px;height:34px;border-radius:10px;background:#F0FFF4;display:flex;align-items:center;justify-content:center;font-size:16px">🍽</div>
+      <div style="font-size:15px;font-weight:700;color:#2D3748">Restaurant</div>
+    </div>
+    <div style="font-size:13px;color:#A0AEC0">270 / 400</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" style="width:67.5%;background:#6BCB77"></div></div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <div style="font-size:11px;color:#6BCB77;font-weight:600">68% utilisé</div>
+    <div style="font-size:11px;color:#A0AEC0">130 CHF restant</div>
+  </div>
+</div>
+
+<!-- Section: Sans budget -->
+<div style="font-size:13px;font-weight:700;color:#A0AEC0;text-transform:uppercase;letter-spacing:.5px;margin:10px 20px 8px">Sans budget</div>
+
+<div style="margin:0 16px 8px;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08);display:flex;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:34px;height:34px;border-radius:10px;background:#F0FFF4;display:flex;align-items:center;justify-content:center;font-size:15px">🎮</div>
+    <div style="font-size:14px;font-weight:600;color:#2D3748">Loisirs</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:14px;font-weight:700;color:#2D3748">100 CHF</div>
+    <div style="background:#F0F4FF;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:#7C9EFF">+ Budget</div>
+  </div>
+</div>
+
+<div style="margin:0 16px;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 1px 8px rgba(124,158,255,.08);display:flex;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:34px;height:34px;border-radius:10px;background:#FFF0F0;display:flex;align-items:center;justify-content:center;font-size:15px">🛍</div>
+    <div style="font-size:14px;font-weight:600;color:#2D3748">Shopping</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:14px;font-weight:700;color:#2D3748">0 CHF</div>
+    <div style="background:#F0F4FF;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:#7C9EFF">+ Budget</div>
+  </div>
+</div>
+
+<div style="position:absolute;bottom:0;left:0;right:0;height:34px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px">
+  <div style="width:134px;height:5px;background:#2D3748;border-radius:3px;opacity:.2"></div>
+</div>
+</body></html>
