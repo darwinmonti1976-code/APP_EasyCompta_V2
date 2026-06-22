@@ -20,8 +20,7 @@
         "NSMicrophoneUsageDescription": "EasyCompta utilise le micro pour enregistrer tes transactions vocales.",
         "NSPhotoLibraryUsageDescription": "EasyCompta peut accéder à tes photos pour joindre des justificatifs.",
         "NSCameraUsageDescription": "EasyCompta peut utiliser l'appareil photo pour photographier des reçus.",
-        "NSUserNotificationsUsageDescription": "EasyCompta envoie des rappels pour tes transactions récurrentes.",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSUserNotificationsUsageDescription": "EasyCompta envoie des rappels pour tes transactions récurrentes."
       }
     },
     "android": {
